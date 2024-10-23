@@ -89,4 +89,36 @@ export class ItemRepository implements IItemRepository {
     );
     return item.rows[0];
   }
+
+  async priceFilter(sortBy: string) {
+    const item = await this.database.query(
+      `
+      SELECT * 
+      FROM items 
+      ORDER BY price ${sortBy};
+      `, []);
+    return item.rows;
+  }
+
+  async dateFilter(sortBy: string) {
+    const item = await this.database.query(
+      `
+      SELECT * 
+      FROM items 
+      ORDER BY created_at $1
+      `, [sortBy]);
+    return item.rows;
+  }
+
+  async categoryFilter(category_id: number) {
+    const item = await this.database.query(
+      `
+        SELECT *
+        from items
+        WHERE category_id = $1
+        `,
+      [category_id]
+    );
+    return item.rows;
+  }
 }

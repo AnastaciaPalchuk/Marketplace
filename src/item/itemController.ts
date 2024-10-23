@@ -65,4 +65,40 @@ export class ItemController {
     const result = await this.service.getItemsList();
     ctx.body = result;
   };
+
+  filterBy = async (ctx: Context) => {
+    const queryParams = ctx.query;
+    try {
+      if (queryParams.price) {
+        const sortBy = queryParams.price;
+        const result = await this.service.filterByPrice(sortBy as string);
+        ctx.body = result;
+        return;
+      }
+      if (queryParams.createdAt) {
+        const sortBy = queryParams.createdAt;
+        const result = await this.service.filterByDate(sortBy as string);
+        ctx.body = result;
+        return;
+      }
+      if (queryParams.category) {
+        const result = await this.service.filterByCategory(
+          +queryParams.category
+        );
+        ctx.body = result;
+        return;
+        
+      } else {
+        ctx.status = 404;
+        ctx.body = "No such filter";
+        return;
+      }
+    } catch (err) {
+      if (err instanceof NotFound) {
+        ctx.status = 404;
+        ctx.body = err.message;
+        return;
+      }
+    }
+  };
 }

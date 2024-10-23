@@ -60,12 +60,17 @@ export class CartRepository implements ICartRepository {
       [itemId]
     );
 
+      const findItem = await this.database.query(`
+        SELECT price
+        from items
+        where id = $1`, [itemId])
+
     const addItem = await this.database.query(
       `
-          insert into cart (user_id, item_id, count) 
-          VALUES ($1, $2, 1);
+          insert into cart (user_id, item_id, count, price) 
+          VALUES ($1, $2, 1, $3);
           `,
-      [userId, itemId]
+      [userId, itemId, findItem.rows[0].price ]
     );
     return addItem;
   }

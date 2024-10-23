@@ -1,14 +1,23 @@
 import { inject, injectable } from "inversify";
 import { NotFound } from "./errors/NotFound";
-import { IItemRepository, ItemRepositoryToken } from "./interfaces/IItemRepository";
+import {
+  IItemRepository,
+  ItemRepositoryToken,
+} from "./interfaces/IItemRepository";
 
 @injectable()
 export class ItemService {
   constructor(
     @inject(ItemRepositoryToken)
-    private readonly repository: IItemRepository) {}
+    private readonly repository: IItemRepository
+  ) {}
 
-  async createItem(itemName: string, categoryId: string, count: number, price: number) {
+  async createItem(
+    itemName: string,
+    categoryId: string,
+    count: number,
+    price: number
+  ) {
     const newItemAdded = await this.repository.createItem(
       itemName,
       categoryId,
@@ -51,4 +60,32 @@ export class ItemService {
   async getItemsList() {
     return this.repository.getItemsList();
   }
+
+  async filterByPrice(sortBy: string) {
+    const priceFilter = await this.repository.priceFilter(sortBy);
+    if (priceFilter) {
+      return priceFilter;
+    } else {
+      throw new NotFound();
+    }
+  }
+
+  async filterByDate(sortBy: string){
+    const priceFilter = await this.repository.priceFilter(sortBy);
+    if (priceFilter) {
+      return priceFilter;
+    } else {
+      throw new NotFound();
+    }
+  }
+
+  async filterByCategory(category_id: number){
+    const categoryFilter = await this.repository.categoryFilter(category_id);
+    if (categoryFilter) {
+      return categoryFilter;
+    } else {
+      throw new NotFound();
+    }
+  }
+
 }

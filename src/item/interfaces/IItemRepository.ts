@@ -21,9 +21,7 @@ export interface IItemRepository {
   >;
   changeCount: (count: number, itemId: string) => Promise<any>;
   changePrice: (price: number, itemId: string) => Promise<any>;
-  findItem: (
-    itemId: string
-  ) => Promise<{
+  findItem: (itemId: string) => Promise<{
     rows: Array<{
       name: string;
       id: number;
@@ -31,4 +29,30 @@ export interface IItemRepository {
       category_id: number;
     }>;
   }>;
+  priceFilter: (sortBy: string) => Promise< Array<{
+    id: number;
+    name: string;
+    category_id: number;
+    count: number;
+    price: number;
+    created_at: Date;
+  }>>;
+  dateFilter: (sortBy: string) => Promise< Array<{
+    id: number;
+    name: string;
+    category_id: number;
+    count: number;
+    price: number;
+    created_at: Date;
+  }>>;
+  categoryFilter: (
+    category_id: number
+  ) => Promise< Array <{
+    id: number;
+    name: string;
+    category_id: number;
+    count: number;
+    price: number;
+    created_at: Date;
+  }>>;
 }

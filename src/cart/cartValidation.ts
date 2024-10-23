@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const addItem = z.object ({
-    itemId: z.number().int().nonnegative(),
+    itemId: z.number().int().nonnegative()
 });
 
 const deleteFromCart = z.object({
