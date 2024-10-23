@@ -61,7 +61,7 @@ export class ItemController {
     ctx.body = { changed: true };
   };
 
-  getCart = async (ctx: Context) => {
+  getList = async (ctx: Context) => {
     const result = await this.service.getItemsList();
     ctx.body = result;
   };

@@ -15,6 +15,6 @@ ItemRouter.post('/addCategory', log, validation(itemValidation.createCategory), 
 ItemRouter.post('/changeCount', log, validation(itemValidation.changeCount), verifyToken, checkPermission, controller.changeCount);
 ItemRouter.post('/changePrice', log, validation(itemValidation.changePrice), verifyToken, checkPermission, controller.changePrice);
 ItemRouter.delete('/', log, validation(itemValidation.deleteItem), verifyToken, checkPermission, controller.delete);
-ItemRouter.get('/', log, verifyToken, controller.getCart);
+ItemRouter.get('/', log, controller.getList);
 
 export = ItemRouter;
