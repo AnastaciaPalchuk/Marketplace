@@ -21,13 +21,13 @@ export interface ICartRepository {
   getCart: (
     userId: number
   ) => Promise<
-    Array<{
+    {Cart: Array<{
       id: number;
       count: number;
       item_id: number;
       item_name: string;
       category_name: string;
-      user_name: string;
-    }>
-  >;
+      user_name: string;}>, 
+      Total: number
+    }>;
 }

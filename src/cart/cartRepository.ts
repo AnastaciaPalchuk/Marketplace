@@ -112,6 +112,14 @@ export class CartRepository implements ICartRepository {
   }
 
   async getCart(userId: number) {
+    const prices = await this.database.query(`
+      SELECT price, count, item_id
+      from cart
+      where user_id = $1;
+      `, [userId])
+
+      const totalAmount = prices.rows.reduce((sum, current) => sum + current.price * current.count, 0);
+
     const getAllItems = await this.database.query(
       `
        SELECT c.id, c.count, i.id as item_id, i.name as item_name, ct.name as category_name, u.name as user_name
@@ -124,6 +132,6 @@ export class CartRepository implements ICartRepository {
       [userId]
     );
 
-    return getAllItems.rows;
+    return { Cart: getAllItems.rows, Total: totalAmount};
   }
 }
