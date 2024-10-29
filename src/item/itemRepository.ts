@@ -37,14 +37,16 @@ export class ItemRepository implements IItemRepository {
     );
   }
 
-  async getItemsList() {
+  async getItemsList(limit: number, offset: number) {
     const list = await this.database.query(
       `
         SELECT i.id, i.name, i.count, i.price, c.id as category_id, c.name as category_name
         from items i 
         inner join categories c on i.category_id = c.id
+        limit  $1
+        offset $2;
         `,
-      []
+      [limit, offset]
     ) as unknown as { rows: Array<{
       id: number;
       name: string;

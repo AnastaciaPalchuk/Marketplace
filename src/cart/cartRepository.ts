@@ -137,6 +137,7 @@ export class CartRepository implements ICartRepository {
       [userId]
     );
 
-    return { Cart: getAllItems.rows, Total: totalAmount};
+    return { Cart: getAllItems.rows, Total: totalAmount/100};
   }
+
 }

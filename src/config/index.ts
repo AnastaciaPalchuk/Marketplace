@@ -16,5 +16,14 @@ export = {
   redis: {
     port: Number(env.REDIS_PORT),
     host: env.REDIS_HOST
+  },
+  mailgun: {
+    key: env.API_KEY,
+    domain: env.DOMAIN,
+    sender: env.EMAIL,
+  },
+  jwt: {
+    token: String(env.TOKEN_KEY)
   }
+
 };

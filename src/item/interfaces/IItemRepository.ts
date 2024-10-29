@@ -9,7 +9,7 @@ export interface IItemRepository {
   ) => Promise<any>;
   createCategory: (categoryName: string) => Promise<any>;
   deleteItem: (itemId: string) => Promise<any>;
-  getItemsList: () => Promise<
+  getItemsList: (limit: number, offset: number) => Promise<
     Array<{
       id: number;
       name: string;
