@@ -16,5 +16,10 @@ export = {
   redis: {
     port: Number(env.REDIS_PORT),
     host: env.REDIS_HOST
+  },
+  mailgun: {
+    key: env.API_KEY,
+    domain: env.DOMAIN
   }
+
 };

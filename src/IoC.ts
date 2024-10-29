@@ -18,6 +18,7 @@ import { ItemController } from "./item/itemController";
 import { IItemRepository, ItemRepositoryToken } from "./item/interfaces/IItemRepository";
 import { ItemRepository } from "./item/itemRepository";
 import { ItemService } from "./item/itemService";
+import { Mail } from "./mail/mailService";
 
 const container = new Container();
 
@@ -42,5 +43,7 @@ container
   .to(ItemRepository)
   .inSingletonScope();
 container.bind(ItemService).toSelf().inSingletonScope();
+
+container.bind(Mail).toSelf().inSingletonScope();
 
 export { container };

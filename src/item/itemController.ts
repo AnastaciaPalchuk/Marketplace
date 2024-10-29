@@ -62,7 +62,9 @@ export class ItemController {
   };
 
   getList = async (ctx: Context) => {
-    const result = await this.service.getItemsList();
+    const params = ctx.query as {limit: string, page: string}
+    const result = await this.service.getItemsList(+params.limit, +params.page -1);
+    result.forEach(item => item.price = +item.price/100);
     ctx.body = result;
   };
 
@@ -72,12 +74,14 @@ export class ItemController {
       if (queryParams.price) {
         const sortBy = queryParams.price;
         const result = await this.service.filterByPrice(sortBy as string);
+        result.forEach(item => item.price = +item.price/100);
         ctx.body = result;
         return;
       }
       if (queryParams.createdAt) {
         const sortBy = queryParams.createdAt;
         const result = await this.service.filterByDate(sortBy as string);
+        const list = result.map(item => item.price = +item.price/100);
         ctx.body = result;
         return;
       }
@@ -85,9 +89,10 @@ export class ItemController {
         const result = await this.service.filterByCategory(
           +queryParams.category
         );
+        const list = result.map(item => item.price = +item.price/100);
         ctx.body = result;
         return;
-        
+
       } else {
         ctx.status = 404;
         ctx.body = "No such filter";

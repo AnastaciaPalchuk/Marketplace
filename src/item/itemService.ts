@@ -57,8 +57,8 @@ export class ItemService {
     }
   }
 
-  async getItemsList() {
-    return this.repository.getItemsList();
+  async getItemsList(limit: number, page: number) {
+    return this.repository.getItemsList(limit, page*limit);
   }
 
   async filterByPrice(sortBy: string) {
