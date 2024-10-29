@@ -37,6 +37,6 @@ export class CartController {
   };
 
   getCart = async (ctx: Context) => {
-    return await this.service.getCart(ctx.userId);
+    ctx.body = await this.service.getCart(ctx.userId);
   };
 }

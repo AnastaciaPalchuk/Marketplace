@@ -40,12 +40,15 @@ export class ItemController {
     try {
       await this.service.deleteItemFromList(item.itemId);
       ctx.body = { success: true };
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof NotFound) {
         ctx.status = 404;
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
   };
 
@@ -81,7 +84,7 @@ export class ItemController {
       if (queryParams.createdAt) {
         const sortBy = queryParams.createdAt;
         const result = await this.service.filterByDate(sortBy as string);
-        const list = result.map(item => item.price = +item.price/100);
+        result.forEach(item => item.price = +item.price/100);
         ctx.body = result;
         return;
       }
@@ -89,7 +92,7 @@ export class ItemController {
         const result = await this.service.filterByCategory(
           +queryParams.category
         );
-        const list = result.map(item => item.price = +item.price/100);
+        result.forEach(item => item.price = +item.price/100);
         ctx.body = result;
         return;
 
@@ -98,12 +101,15 @@ export class ItemController {
         ctx.body = "No such filter";
         return;
       }
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof NotFound) {
         ctx.status = 404;
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
   };
 }

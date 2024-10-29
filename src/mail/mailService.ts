@@ -20,8 +20,8 @@ export class Mail {
     const verifyLink = `http://localhost:7171/auth/emailVerify?id=${id}&code=${code}`;
 
     await this.mg.messages.create(config.mailgun.domain as string, {
-      from: `apalchuk16@gmail.com`,
-      to: `${userEmail}`,
+        from: config.mailgun.sender,
+        to: `${userEmail}`,
       subject: "Email verification code",
       html: `<p>Click the link below to verify your email:</p>
                <a href="${verifyLink}">Verify Email</a>`,
@@ -30,7 +30,7 @@ export class Mail {
 
   async passwordReset(userEmail: string, code: number) {
     await this.mg.messages.create(config.mailgun.domain as string, {
-      from: `apalchuk16@gmail.com`,
+      from: config.mailgun.sender,
       to: `${userEmail}`,
       subject: "Password reset code",
       html: `<p>Your code to reset password is ${code}</p>`,

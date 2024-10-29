@@ -27,18 +27,21 @@ export class AuthController {
       );
       ctx.body = {
         user: {
-          id: userInfo.rows[0].id,
-          name: userInfo.rows[0].name,
-          surname: userInfo.rows[0].surname,
-          email: userInfo.rows[0].email,
+          id: userInfo.id,
+          name: userInfo.name,
+          surname: userInfo.surname,
+          email: userInfo.email,
         },
       };
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof UserAlreadyExists) {
         ctx.status = 403;
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
 
   };
@@ -51,7 +54,7 @@ export class AuthController {
         user.password
       );
       ctx.body = userSignIn;
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof WrongCredentials) {
         ctx.status = 400;
         ctx.body = err.message;
@@ -62,6 +65,9 @@ export class AuthController {
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
   };
 
@@ -70,12 +76,15 @@ export class AuthController {
     try{
       await this.service.verifyEmail(+params.code, +params.id);
       ctx.body = { success: true};
-    }catch(err){
+    }catch(err: any){
       if (err instanceof WrongCode){
         ctx.status = 400;
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
   }
 
@@ -84,12 +93,15 @@ export class AuthController {
     try{
       await this.service.passwordReset(user.email);
       ctx.body = {success: true};
-    }catch(err){
+    }catch(err: any){
       if(err instanceof WrongCredentials){
         ctx.status = 400;
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
   }
 
@@ -98,12 +110,15 @@ export class AuthController {
     try{
       await this.service.changePassword(user.code, user.password);
       ctx.body = {success: true};
-    }catch(err){
+    }catch(err: any){
       if(err instanceof WrongCode){
         ctx.status = 400;
         ctx.body = err.message;
         return;
       }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
     }
   }
 }

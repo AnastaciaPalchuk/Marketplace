@@ -40,7 +40,7 @@ export class AuthRepository implements IAuthRepository {
                 VALUES ($1, $2, 'EMAIL_VERIFICATION');
                 `, [user.rows[0].id, code ]);
 
-    return user;
+    return user.rows[0];
   }
 
 

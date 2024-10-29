@@ -19,7 +19,11 @@ export = {
   },
   mailgun: {
     key: env.API_KEY,
-    domain: env.DOMAIN
+    domain: env.DOMAIN,
+    sender: env.EMAIL,
+  },
+  jwt: {
+    token: String(env.TOKEN_KEY)
   }
 
 };
