@@ -45,7 +45,6 @@ export class AuthService {
         hashpassword
       );
 
-      // TODO create variabel code that notifiaction service will return and use it to sendMAil
       await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
       const thisCode = await this.notificationservice.getCode(user.id);
       await this.mail.sendMail(user.id, user.email, thisCode.code);
@@ -83,7 +82,6 @@ export class AuthService {
     if (checkCode.code !== code) {
       throw new WrongCode();
     } else if (expires_at < Date.now()) {
-      //TODO remove
       const user = await this.repository.findUserById(user_id);
       await this.notificationservice.addCode(user_id, "EMAIL_VERIFICATION");
       await this.mail.sendMail(user_id, user.email, code);
@@ -93,7 +91,6 @@ export class AuthService {
   }
 
   async passwordReset(email: string) {
-    //TODO remove
     const findUser = await this.repository.findUserByEmail(email);
     if (findUser) {
       const thisCode = await this.notificationservice.getCode(findUser.id);
@@ -108,7 +105,6 @@ export class AuthService {
   }
 
   async changePassword(id: number, code: number, password: string) {
-    // TODO accept id of notification and then check code
     let checkCode = await this.notificationservice.checkCode(id, code);
     let hashpassword = this.hash(password);
     const expires_at = checkCode.created_at + 15 * 60 * 1000;
