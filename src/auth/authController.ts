@@ -5,6 +5,7 @@ import { WrongCredentials } from "./errors/WrongCredentials";
 import { injectable } from "inversify";
 import { EmailNotVerifies } from "./errors/EmailNotVerified";
 import { WrongCode } from "./errors/WrongCode";
+import { ExpiredCode } from "./errors/ExpiredCode";
 
 @injectable()
 export class AuthController {
@@ -81,7 +82,7 @@ export class AuthController {
       }
       ctx.body = { success: true};
     }catch(err: any){
-      if (err instanceof WrongCode){
+      if (err instanceof WrongCode || err instanceof ExpiredCode){
         ctx.status = 400;
         ctx.body = err.message;
         return;

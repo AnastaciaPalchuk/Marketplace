@@ -11,13 +11,16 @@ import { EmailNotVerifies } from "./errors/EmailNotVerified";
 import { WrongCode } from "./errors/WrongCode";
 import { Mail } from "../mail/mailService";
 import config from "../config/index";
+import { NotificationService } from "../notifications/notificationService";
+import { ExpiredCode } from "./errors/ExpiredCode";
 
 @injectable()
 export class AuthService {
   constructor(
     @inject(AuthRepositoryToken)
     private readonly repository: IAuthRepository,
-    private readonly mail: Mail
+    private readonly mail: Mail,
+    private readonly service: NotificationService
   ) {}
 
   generateCode(){
@@ -45,9 +48,9 @@ export class AuthService {
         surname,
         email,
         hashpassword,
-        code
       );
-      await this.mail.sendMail(user.id, email, code);
+      await this.service.addEmailVerificationCode(code, user.id)
+      await this.service.sendCode(user.id, user.email, code);
       return user;
     }
   }
@@ -76,15 +79,16 @@ export class AuthService {
   }
 
   async verifyEmail(code: number, user_id: number){
-    let checkCode = await this.repository.getCode(user_id);
+    let checkCode = await this.service.getCode(user_id);
+    const expires_at = checkCode.created_at + 15 * 60 * 1000;
 
     if(checkCode.code !== code){throw new WrongCode()}
-    else if ( checkCode.expires_at < Date.now()){
+    else if ( expires_at < Date.now()){
       const newCode = this.generateCode();
       const user = await this.repository.findUserById(user_id)
-      await this.repository.addEmailCode(newCode, user_id);
-      await this.mail.sendMail(user_id, user.email, code);
-      return "expired";
+      await this.service.addEmailVerificationCode(newCode, user_id);
+      await this.service.sendCode(user_id, user.email, code);
+      throw new ExpiredCode();
     }
       return this.repository.changeEmailIsVerified(user_id);
   }
@@ -95,7 +99,7 @@ export class AuthService {
     if (findUser) {
       await Promise.all([
         this.mail.passwordReset(email, code),
-        this.repository.addCode(code, findUser.id)
+        this.service.addPasswordResetCode(code, findUser.id)
       ])
       return findUser;
     } else {
@@ -104,7 +108,7 @@ export class AuthService {
 }
 
 async changePassword(code: number, password: string){
-  let checkCode = await this.repository.findUserId(code);
+  let checkCode = await this.service.findUserId(code);
   let hashpassword = this.hash(password);
   if(checkCode){
     return this.repository.changePassword(checkCode, hashpassword);

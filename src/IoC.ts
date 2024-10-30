@@ -19,6 +19,9 @@ import { IItemRepository, ItemRepositoryToken } from "./item/interfaces/IItemRep
 import { ItemRepository } from "./item/itemRepository";
 import { ItemService } from "./item/itemService";
 import { Mail } from "./mail/mailService";
+import { INotificationRepository, NotificationRepositoryToken } from "./notifications/interfaces/INotificationRepository";
+import { NotificationRepository } from "./notifications/notificationRepository";
+import { NotificationService } from "./notifications/notificationService";
 
 const container = new Container();
 
@@ -45,5 +48,11 @@ container
 container.bind(ItemService).toSelf().inSingletonScope();
 
 container.bind(Mail).toSelf().inSingletonScope();
+
+container
+  .bind<INotificationRepository>(NotificationRepositoryToken)
+  .to(NotificationRepository)
+  .inSingletonScope();
+container.bind(NotificationService).toSelf().inSingletonScope();
 
 export { container };
