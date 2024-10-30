@@ -111,9 +111,9 @@ export class AuthController {
   }
 
   changePassword = async (ctx: Context) => {
-    const user = ctx.request.body as {password: string, code: number}
+    const user = ctx.request.body as {id: number, password: string, code: number}
     try{
-      await this.service.changePassword(user.code, user.password);
+      await this.service.changePassword(user.id, user.code, user.password);
       ctx.body = {success: true};
     }catch(err: any){
       if(err instanceof WrongCode){

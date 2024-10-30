@@ -20,15 +20,11 @@ export class AuthService {
     @inject(AuthRepositoryToken)
     private readonly repository: IAuthRepository,
     private readonly mail: Mail,
-    private readonly service: NotificationService
+    private readonly notificationservice: NotificationService
   ) {}
 
-  generateCode(){
-    return randomInt(100000, 999999);
-  }
-
-  hash(password: string){
-  return createHash("sha256").update(password).digest("hex")
+  hash(password: string) {
+    return createHash("sha256").update(password).digest("hex");
   }
 
   async createUser(
@@ -37,7 +33,6 @@ export class AuthService {
     email: string,
     password: string
   ) {
-    const code = this.generateCode();
     const findUser = await this.repository.findUserByEmail(email);
     let hashpassword = this.hash(password);
     if (findUser) {
@@ -47,10 +42,13 @@ export class AuthService {
         name,
         surname,
         email,
-        hashpassword,
+        hashpassword
       );
-      await this.service.addEmailVerificationCode(code, user.id)
-      await this.service.sendCode(user.id, user.email, code);
+
+      // TODO create variabel code that notifiaction service will return and use it to sendMAil
+      await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
+      const thisCode = await this.notificationservice.getCode(user.id);
+      await this.mail.sendMail(user.id, user.email, thisCode.code);
       return user;
     }
   }
@@ -78,43 +76,50 @@ export class AuthService {
     }
   }
 
-  async verifyEmail(code: number, user_id: number){
-    let checkCode = await this.service.getCode(user_id);
+  async verifyEmail(code: number, user_id: number) {
+    let checkCode = await this.notificationservice.getCode(user_id);
     const expires_at = checkCode.created_at + 15 * 60 * 1000;
 
-    if(checkCode.code !== code){throw new WrongCode()}
-    else if ( expires_at < Date.now()){
-      const newCode = this.generateCode();
-      const user = await this.repository.findUserById(user_id)
-      await this.service.addEmailVerificationCode(newCode, user_id);
-      await this.service.sendCode(user_id, user.email, code);
+    if (checkCode.code !== code) {
+      throw new WrongCode();
+    } else if (expires_at < Date.now()) {
+      //TODO remove
+      const user = await this.repository.findUserById(user_id);
+      await this.notificationservice.addCode(user_id, "EMAIL_VERIFICATION");
+      await this.mail.sendMail(user_id, user.email, code);
       throw new ExpiredCode();
     }
-      return this.repository.changeEmailIsVerified(user_id);
+    return this.repository.changeEmailIsVerified(user_id);
   }
 
-  async passwordReset(email: string){
-    const code = this.generateCode();
+  async passwordReset(email: string) {
+    //TODO remove
     const findUser = await this.repository.findUserByEmail(email);
     if (findUser) {
+      const thisCode = await this.notificationservice.getCode(findUser.id);
       await Promise.all([
-        this.mail.passwordReset(email, code),
-        this.service.addPasswordResetCode(code, findUser.id)
-      ])
+        this.mail.passwordReset(email, thisCode.id),
+        this.notificationservice.addCode(findUser.id, "PASSWORD_RESET"),
+      ]);
       return findUser;
     } else {
       throw new WrongCredentials();
+    }
   }
-}
 
-async changePassword(code: number, password: string){
-  let checkCode = await this.service.findUserId(code);
-  let hashpassword = this.hash(password);
-  if(checkCode){
-    return this.repository.changePassword(checkCode, hashpassword);
+  async changePassword(id: number, code: number, password: string) {
+    // TODO accept id of notification and then check code
+    let checkCode = await this.notificationservice.checkCode(id, code);
+    let hashpassword = this.hash(password);
+    const expires_at = checkCode.created_at + 15 * 60 * 1000;
+    if (checkCode) {
+      if (expires_at < Date.now()) {
+        return this.repository.changePassword(checkCode.user_id, hashpassword);
+      } else {
+        throw new ExpiredCode();
+      }
+    } else {
+      throw new WrongCode();
+    }
   }
-  else{
-    throw new WrongCode();
-  }
-}
 }

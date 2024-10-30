@@ -4,6 +4,7 @@ import {
   INotificationRepository,
 } from "./interfaces/INotificationRepository";
 import { Mail } from "../mail/mailService";
+import { randomInt } from "crypto";
 
 @injectable()
 export class NotificationService {
@@ -13,23 +14,20 @@ export class NotificationService {
     private readonly mail: Mail
   ) {}
 
-  async addEmailVerificationCode(code: number, user_id: number) {
-    return this.repository.addEmailVerificationCode(code, user_id);
+  generateCode(){
+    return randomInt(100000, 999999);
   }
 
-  async addPasswordResetCode(code: number, id: number) {
-    return this.repository.addPasswordResetCode(code, id);
+  async addCode(user_id: number, type: string) {
+    return this.repository.addCode(this.generateCode(), user_id, type);
   }
 
   async getCode(user_id: number) {
     return this.repository.getCode(user_id);
   }
 
-  async findUserId(code: number) {
-    return this.repository.findUserId(code);
+  async checkCode(id: number, code: number) {
+    return this.repository.checkCode(id, code);
   }
 
-  async sendCode(id: number, email: string, code: number) {
-    return this.mail.sendMail(id, email, code);
-  }
 }

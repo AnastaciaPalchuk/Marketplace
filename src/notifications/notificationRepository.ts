@@ -6,23 +6,13 @@ import { INotificationRepository } from "./interfaces/INotificationRepository";
 export class NotificationRepository implements INotificationRepository {
   constructor(private readonly database: Database) {}
 
-  async addEmailVerificationCode(code: number, user_id: number) {
-    await this.database.query(
-      `
-                  insert into notifications (user_id, code, type_of_notice)
-                  VALUES ($1, $2, 'EMAIL_VERIFICATION');
-                  `,
-      [user_id, code]
-    );
-  }
-
-  async addPasswordResetCode(code: number, id: number) {
+  async addCode(code: number, user_id: number, type: string) {
     return this.database.query(
       `
-      insert into notifications (user_id, code, type_of_notice)
-      VALUES ($1, $2, 'PASSWORD_RESET');
-      `,
-      [id, code]
+                  insert into notifications (user_id, code, type_of_notice)
+                  VALUES ($1, $2, $3);
+                  `,
+      [user_id, code, type]
     );
   }
 
@@ -38,15 +28,15 @@ export class NotificationRepository implements INotificationRepository {
     return getCode.rows[0];
   }
 
-  async findUserId(code: number) {
+  async checkCode(id: number, code: number) {
     const user = await this.database.query(
       `
       SELECT *
       from notifications
-      WHERE code = $1
+      WHERE id = $1 and code = $2
       `,
-      [code]
+      [id, code]
     );
-    return user.rows[0].user_id;
+    return user.rows[0];
   }
 }

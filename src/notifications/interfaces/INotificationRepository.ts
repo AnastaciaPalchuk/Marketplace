@@ -11,7 +11,6 @@ export interface INotificationRepository {
     expires_at: number;
     created_at: number;
   }>;
-  addEmailVerificationCode: (code: number, id: number) => Promise<any>;
-  addPasswordResetCode: (code: number, id: number) => Promise<any>;
-  findUserId: (code: number) => Promise<number>;
+  addCode: (code: number, id: number, type: string) => Promise<any>;
+  checkCode: (id: number, code: number) => Promise<{id: number, code: number, user_id: number, created_at: number}>;
 }
