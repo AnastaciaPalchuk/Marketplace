@@ -1,4 +1,4 @@
-import { createHash, randomInt } from "crypto";
+import { createHash, randomInt } from "node:crypto";
 import jsonwebtoken from "jsonwebtoken";
 import { UserAlreadyExists } from "./errors/UserAlreadyExists";
 import { WrongCredentials } from "./errors/WrongCredentials";
@@ -77,7 +77,15 @@ export class AuthService {
 
   async verifyEmail(code: number, user_id: number){
     let checkCode = await this.repository.getCode(user_id);
-    if(checkCode !== code){throw new WrongCode()}
+
+    if(checkCode.code !== code){throw new WrongCode()}
+    else if ( checkCode.expires_at < Date.now()){
+      const newCode = this.generateCode();
+      const user = await this.repository.findUserById(user_id)
+      await this.repository.addEmailCode(newCode, user_id);
+      await this.mail.sendMail(user_id, user.email, code);
+      return "expired";
+    }
       return this.repository.changeEmailIsVerified(user_id);
   }
 

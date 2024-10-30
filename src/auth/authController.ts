@@ -74,7 +74,11 @@ export class AuthController {
   verifyEmail = async (ctx: Context) => {
     const params = ctx.query as {code: string, id: string};
     try{
-      await this.service.verifyEmail(+params.code, +params.id);
+      const verifier = await this.service.verifyEmail(+params.code, +params.id);
+      if(verifier === "expired"){
+        ctx.body = { response: "code expired, new one sent to your email"}
+        return;
+      }
       ctx.body = { success: true};
     }catch(err: any){
       if (err instanceof WrongCode){
@@ -90,8 +94,8 @@ export class AuthController {
 
   passwordReset = async (ctx: Context) => {
     const user = ctx.request.body as { email: string};
-    try{
-      await this.service.passwordReset(user.email);
+    try{ 
+      const reset = await this.service.passwordReset(user.email);
       ctx.body = {success: true};
     }catch(err: any){
       if(err instanceof WrongCredentials){
