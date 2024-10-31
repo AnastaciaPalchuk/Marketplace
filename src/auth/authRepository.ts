@@ -18,13 +18,23 @@ export class AuthRepository implements IAuthRepository {
     );
     return result.rows[0];
   }
+  async findUserById(id: number) {
+    const result = await this.database.query(
+      `
+              SELECT *
+              from users
+              where id = $1
+          `,
+      [id]
+    );
+    return result.rows[0];
+  }
 
   async createNewUser(
     userName: string,
     userSurname: string,
     userEmail: string,
     userPassword: string,
-    code: number 
   ) {
     const user = await this.database.query(
       `
@@ -35,62 +45,41 @@ export class AuthRepository implements IAuthRepository {
       [userName, userSurname, userEmail, userPassword]
     );
 
-    const notification = await this.database.query(`
-                insert into notifications ( user_id, code, type_of_notice)
-                VALUES ($1, $2, 'EMAIL_VERIFICATION');
-                `, [user.rows[0].id, code ]);
-
     return user.rows[0];
   }
 
-
-  async isVerified(user_id: number){
-    const isVerified = await this.database.query(`
+  async isVerified(user_id: number) {
+    const isVerified = await this.database.query(
+      `
       SELECT *
       from users
       where id = $1;
-      `, [user_id]);
-      return isVerified.rows[0].is_email_verified;
+      `,
+      [user_id]
+    );
+    return isVerified.rows[0].is_email_verified;
   }
 
-  async getCode(user_id: number){
-    const getCode = await this.database.query(`
-     SELECT *
-      from notifications
-      where user_id = $1;
-      `, [user_id]);
-      return getCode.rows[0].code;
-  }
 
-  async changeEmailIsVerified(user_id: number){
-    return this.database.query(`
+  async changeEmailIsVerified(user_id: number) {
+    return this.database.query(
+      `
       UPDATE users
         SET is_email_verified = true
         WHERE id = $1;
-        `, [user_id])
+        `,
+      [user_id]
+    );
   }
 
-  async addCode(code: number, id: number){
-    return this.database.query(`
-      insert into notifications (user_id, code, type_of_notice)
-      VALUES ($1, $2, 'PASSWORD_RESET');
-      `, [id, code])
-  }
-
-  async changePassword( id: number, password: string){
-    return this.database.query(`
+  async changePassword(id: number, password: string) {
+    return this.database.query(
+      `
       UPDATE users
       SET password = $2
       WHERE id = $1
-      `, [id, password])
-  }
-
-  async findUserId(code: number){
-    const user = await this.database.query(`
-      SELECT *
-      from notifications
-      WHERE code = $1
-      `, [code])
-      return user.rows[0].user_id;
+      `,
+      [id, password]
+    );
   }
 }

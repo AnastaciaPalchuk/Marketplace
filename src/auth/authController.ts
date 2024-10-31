@@ -5,6 +5,7 @@ import { WrongCredentials } from "./errors/WrongCredentials";
 import { injectable } from "inversify";
 import { EmailNotVerifies } from "./errors/EmailNotVerified";
 import { WrongCode } from "./errors/WrongCode";
+import { ExpiredCode } from "./errors/ExpiredCode";
 
 @injectable()
 export class AuthController {
@@ -74,10 +75,14 @@ export class AuthController {
   verifyEmail = async (ctx: Context) => {
     const params = ctx.query as {code: string, id: string};
     try{
-      await this.service.verifyEmail(+params.code, +params.id);
+      const verifier = await this.service.verifyEmail(+params.code, +params.id);
+      if(verifier === "expired"){
+        ctx.body = { response: "code expired, new one sent to your email"}
+        return;
+      }
       ctx.body = { success: true};
     }catch(err: any){
-      if (err instanceof WrongCode){
+      if (err instanceof WrongCode || err instanceof ExpiredCode){
         ctx.status = 400;
         ctx.body = err.message;
         return;
@@ -90,8 +95,8 @@ export class AuthController {
 
   passwordReset = async (ctx: Context) => {
     const user = ctx.request.body as { email: string};
-    try{
-      await this.service.passwordReset(user.email);
+    try{ 
+      const reset = await this.service.passwordReset(user.email);
       ctx.body = {success: true};
     }catch(err: any){
       if(err instanceof WrongCredentials){
@@ -106,9 +111,9 @@ export class AuthController {
   }
 
   changePassword = async (ctx: Context) => {
-    const user = ctx.request.body as {password: string, code: number}
+    const user = ctx.request.body as {id: number, password: string, code: number}
     try{
-      await this.service.changePassword(user.code, user.password);
+      await this.service.changePassword(user.id, user.code, user.password);
       ctx.body = {success: true};
     }catch(err: any){
       if(err instanceof WrongCode){
