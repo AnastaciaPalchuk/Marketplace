@@ -19,11 +19,13 @@ export class NotificationService {
   }
 
   async addCode(user_id: number, type: string) {
-    return this.repository.addCode(this.generateCode(), user_id, type);
+    const code = this.generateCode();
+    await this.repository.addCode(code, user_id, type);
+    return code;
   }
 
-  async getCode(user_id: number) {
-    return this.repository.getCode(user_id);
+  async getCode(user_id: number, type_of_notice: string) {
+    return this.repository.getCode(user_id, type_of_notice);
   }
 
   async checkCode(id: number, code: number) {

@@ -16,14 +16,14 @@ export class NotificationRepository implements INotificationRepository {
     );
   }
 
-  async getCode(user_id: number) {
+  async getCode(user_id: number, type_of_notice: string) {
     const getCode = await this.database.query(
       `
      SELECT *
       from notifications
-      where user_id = $1;
+      where user_id = $1 and type_of_notice = $2;
       `,
-      [user_id]
+      [user_id, type_of_notice]
     );
     return getCode.rows[0];
   }

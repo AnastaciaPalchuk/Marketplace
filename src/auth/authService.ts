@@ -45,9 +45,8 @@ export class AuthService {
         hashpassword
       );
 
-      await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
-      const thisCode = await this.notificationservice.getCode(user.id);
-      await this.mail.sendMail(user.id, user.email, thisCode.code);
+      const code = await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
+      await this.mail.sendMail(user.id, user.email, code);
       return user;
     }
   }
@@ -76,7 +75,7 @@ export class AuthService {
   }
 
   async verifyEmail(code: number, user_id: number) {
-    let checkCode = await this.notificationservice.getCode(user_id);
+    let checkCode = await this.notificationservice.getCode(user_id, "EMAIL_VERIFICATION");
     const expires_at = checkCode.created_at + 15 * 60 * 1000;
 
     if (checkCode.code !== code) {
@@ -93,7 +92,7 @@ export class AuthService {
   async passwordReset(email: string) {
     const findUser = await this.repository.findUserByEmail(email);
     if (findUser) {
-      const thisCode = await this.notificationservice.getCode(findUser.id);
+      const thisCode = await this.notificationservice.getCode(findUser.id, "PASSWORD_RESET");
       await Promise.all([
         this.mail.passwordReset(email, thisCode.id),
         this.notificationservice.addCode(findUser.id, "PASSWORD_RESET"),

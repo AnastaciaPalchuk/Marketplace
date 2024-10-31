@@ -3,7 +3,7 @@ export const NotificationRepositoryToken = Symbol(
 );
 
 export interface INotificationRepository {
-  getCode: (user_id: number) => Promise<{
+  getCode: (user_id: number, type_of_notice: string) => Promise<{
     id: number;
     user_id: number;
     code: number;
