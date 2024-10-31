@@ -63,7 +63,8 @@ export class AuthService {
               id: userLogin.id,
               access_type: userLogin.access_type,
             },
-            config.jwt.token
+            config.jwt.token,
+            {expiresIn: '10m'}
           ),
         };
       } else {
