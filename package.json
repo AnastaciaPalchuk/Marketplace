@@ -25,6 +25,7 @@
     "koa-static": "^5.0.0",
     "mailgun.js": "^10.2.3",
     "pg": "^8.13.0",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "zod": "^3.23.8"
   },
