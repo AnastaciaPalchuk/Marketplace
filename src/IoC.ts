@@ -3,6 +3,8 @@ import { AuthController } from "./auth/authController";
 import { AuthRepository } from "./auth/authRepository";
 import { AuthService } from "./auth/authService";
 import { Database } from "./infra/database";
+import { RedisConnection } from "./infra/redis";
+
 import {
   AuthRepositoryToken,
   IAuthRepository,
@@ -22,6 +24,7 @@ import { Mail } from "./mail/mailService";
 import { INotificationRepository, NotificationRepositoryToken } from "./notifications/interfaces/INotificationRepository";
 import { NotificationRepository } from "./notifications/notificationRepository";
 import { NotificationService } from "./notifications/notificationService";
+import { CryptoService } from "./crypto/cryptoService";
 
 const container = new Container();
 
@@ -54,5 +57,8 @@ container
   .to(NotificationRepository)
   .inSingletonScope();
 container.bind(NotificationService).toSelf().inSingletonScope();
+container.bind(RedisConnection).toSelf().inSingletonScope();
+container.bind(CryptoService).toSelf().inSingletonScope();
+
 
 export { container };

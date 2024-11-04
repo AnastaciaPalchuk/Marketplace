@@ -9,6 +9,7 @@ import CartRouter from "./cart/cartRouter";
 import ItemRouter from "./item/itemRouter";
 import { container } from "./IoC";
 import { Database } from "./infra/database";
+import { RedisConnection } from "./infra/redis";
 
 async function main() {
   const database = container.get(Database);
@@ -22,6 +23,9 @@ async function main() {
 
   app.use(cors());
   app.use(bodyparser());
+  const redis = container.get(RedisConnection);
+  redis.connect();
+
 
   app.use(router.routes());
   app.listen(config.server.port, () =>

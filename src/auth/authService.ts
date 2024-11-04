@@ -1,5 +1,3 @@
-import { createHash, randomInt } from "node:crypto";
-import jsonwebtoken from "jsonwebtoken";
 import { UserAlreadyExists } from "./errors/UserAlreadyExists";
 import { WrongCredentials } from "./errors/WrongCredentials";
 import { inject, injectable } from "inversify";
@@ -13,6 +11,7 @@ import { Mail } from "../mail/mailService";
 import config from "../config/index";
 import { NotificationService } from "../notifications/notificationService";
 import { ExpiredCode } from "./errors/ExpiredCode";
+import { CryptoService } from "../crypto/cryptoService";
 
 @injectable()
 export class AuthService {
@@ -20,12 +19,9 @@ export class AuthService {
     @inject(AuthRepositoryToken)
     private readonly repository: IAuthRepository,
     private readonly mail: Mail,
-    private readonly notificationservice: NotificationService
+    private readonly notificationservice: NotificationService,
+    private readonly crypto: CryptoService
   ) {}
-
-  hash(password: string) {
-    return createHash("sha256").update(password).digest("hex");
-  }
 
   async createUser(
     name: string,
@@ -34,7 +30,7 @@ export class AuthService {
     password: string
   ) {
     const findUser = await this.repository.findUserByEmail(email);
-    let hashpassword = this.hash(password);
+    let hashpassword = await this.crypto.createHash(password);
     if (findUser) {
       throw new UserAlreadyExists();
     } else {
@@ -52,21 +48,12 @@ export class AuthService {
   }
 
   async loginUser(email: string, password: string) {
-    let hashpassword = this.hash(password);
+    let hashpassword = await this.crypto.createHash(password);
     let userLogin = await this.repository.findUserByEmail(email);
     const isVerified = await this.repository.isVerified(userLogin.id);
     if (isVerified) {
       if (userLogin.password === hashpassword) {
-        return {
-          token: jsonwebtoken.sign(
-            {
-              id: userLogin.id,
-              access_type: userLogin.access_type,
-            },
-            config.jwt.token,
-            {expiresIn: '10m'}
-          ),
-        };
+        return this.crypto.jwtSign(userLogin.id, userLogin.access_type, config.jwt.token);
       } else {
         throw new WrongCredentials();
       }
@@ -106,7 +93,7 @@ export class AuthService {
 
   async changePassword(id: number, code: number, password: string) {
     let checkCode = await this.notificationservice.checkCode(id, code);
-    let hashpassword = this.hash(password);
+    let hashpassword = await this.crypto.createHash(password);
     const expires_at = checkCode.created_at + 15 * 60 * 1000;
     if (checkCode) {
       if (expires_at < Date.now()) {

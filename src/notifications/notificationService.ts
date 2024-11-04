@@ -4,22 +4,19 @@ import {
   INotificationRepository,
 } from "./interfaces/INotificationRepository";
 import { Mail } from "../mail/mailService";
-import { randomInt } from "crypto";
+import { CryptoService } from "../crypto/cryptoService";
 
 @injectable()
 export class NotificationService {
   constructor(
     @inject(NotificationRepositoryToken)
     private readonly repository: INotificationRepository,
-    private readonly mail: Mail
+    private readonly crypto: CryptoService
   ) {}
 
-  generateCode(){
-    return randomInt(100000, 999999);
-  }
 
   async addCode(user_id: number, type: string) {
-    const code = this.generateCode();
+    const code = await this.crypto.generateCode();
     await this.repository.addCode(code, user_id, type);
     return code;
   }
