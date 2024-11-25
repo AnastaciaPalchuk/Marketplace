@@ -19,7 +19,7 @@ export class NotificationRepository implements INotificationRepository {
   async getCode(user_id: number, type_of_notice: string) {
     const getCode = await this.database.query(
       `
-     SELECT *
+     SELECT code
       from notifications
       where user_id = $1 and type_of_notice = $2;
       `,
@@ -33,10 +33,18 @@ export class NotificationRepository implements INotificationRepository {
       `
       SELECT *
       from notifications
-      WHERE id = $1 and code = $2
+      WHERE user_id = $1 and code = $2
       `,
       [id, code]
     );
-    return user.rows[0];
+    return user;
+  }
+
+  async deleteCode(code: number){
+    return this.database.query(`
+      DELETE
+      from notifications
+      WHERE code = $1;
+      `, [code])
   }
 }

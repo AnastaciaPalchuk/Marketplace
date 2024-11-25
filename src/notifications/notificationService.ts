@@ -3,8 +3,8 @@ import {
   NotificationRepositoryToken,
   INotificationRepository,
 } from "./interfaces/INotificationRepository";
-import { Mail } from "../mail/mailService";
 import { CryptoService } from "../crypto/cryptoService";
+
 
 @injectable()
 export class NotificationService {
@@ -27,6 +27,10 @@ export class NotificationService {
 
   async checkCode(id: number, code: number) {
     return this.repository.checkCode(id, code);
+  }
+
+  async deleteCode(code: number){
+    return this.repository.deleteCode(code);
   }
 
 }

@@ -40,7 +40,7 @@ export class ItemRepository implements IItemRepository {
   async getItemsList(limit: number, offset: number) {
     const list = await this.database.query(
       `
-        SELECT i.id, i.name, i.count, i.price, c.id as category_id, c.name as category_name
+        SELECT i.id, i.name, i.count, i.price, i.photo, c.id as category_id, c.name as category_name
         from items i 
         inner join categories c on i.category_id = c.id
         limit  $1
@@ -52,6 +52,7 @@ export class ItemRepository implements IItemRepository {
       name: string;
       count: number;
       price: number;
+      photo: string;
       category_id: number;
       category_name: string;
     }> }; 
@@ -122,5 +123,17 @@ export class ItemRepository implements IItemRepository {
       [category_id]
     );
     return item.rows;
+  }
+
+  async addPhoto(url: string, id: number){
+    return this.database.query(
+      `
+      UPDATE items
+        SET photo = $1
+        WHERE id = $2
+
+      `,
+      [url, id]
+    )
   }
 }

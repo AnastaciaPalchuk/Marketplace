@@ -18,5 +18,6 @@ ItemRouter.post('/changePrice', log, validation(itemValidation.changePrice), ver
 ItemRouter.delete('/', log, validation(itemValidation.deleteItem), verifyToken, checkPermission, controller.delete);
 ItemRouter.get('/', log, controller.getList);
 ItemRouter.get('/filter',verifyToken, controller.filterBy)
+ItemRouter.put('/photo',log,  verifyToken, checkPermission, controller.updatePhoto )
 
 export = ItemRouter;

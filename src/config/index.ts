@@ -24,6 +24,12 @@ export = {
   },
   jwt: {
     token: String(env.TOKEN_KEY)
+  },
+  aws: {
+    accessKeyId: env.ACCESS_KEY_ID,
+    secretAccessKey: env.SECRET_ACCESS_KEY,
+    bucketName: env.BUCKET_NAME,
+    photoFolder: env.USER_PHOTO_FOLDER,
   }
 
 };

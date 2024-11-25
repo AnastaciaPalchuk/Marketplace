@@ -112,4 +112,25 @@ export class ItemController {
       return;
     }
   };
+
+  updatePhoto = async(ctx: Context) => {
+    const item = ctx.request.body as { id: number, photo: string,};
+    try{
+      const photoLink = await this.service.addPhoto(item.photo, item.id);
+      console.log(photoLink)
+
+      ctx.body = { photoLink };
+      return;
+    }
+    catch(err: any){
+      if(err instanceof NotFound){
+        ctx.status = 404;
+        ctx.body = err.message;
+        return;
+      }
+      ctx.status = 500;
+      ctx.body = err.message;
+      return;
+    }
+  }
 }

@@ -15,6 +15,7 @@ export interface IItemRepository {
       name: string;
       count: number;
       price: number;
+      photo: string;
       category_id: number;
       category_name: string;
     }>
@@ -25,6 +26,7 @@ export interface IItemRepository {
     rows: Array<{
       name: string;
       id: number;
+      photo: string;
       count: number;
       category_id: number;
     }>;
@@ -32,6 +34,7 @@ export interface IItemRepository {
   priceFilter: (sortBy: string) => Promise< Array<{
     id: number;
     name: string;
+    photo: string;
     category_id: number;
     count: number;
     price: number;
@@ -40,6 +43,7 @@ export interface IItemRepository {
   dateFilter: (sortBy: string) => Promise< Array<{
     id: number;
     name: string;
+    photo: string;
     category_id: number;
     count: number;
     price: number;
@@ -50,9 +54,11 @@ export interface IItemRepository {
   ) => Promise< Array <{
     id: number;
     name: string;
+    photo: string;
     category_id: number;
     count: number;
     price: number;
     created_at: Date;
   }>>;
+addPhoto: (url: string, id: number) => Promise<any>;
 }

@@ -12,6 +12,7 @@ import config from "../config/index";
 import { NotificationService } from "../notifications/notificationService";
 import { ExpiredCode } from "./errors/ExpiredCode";
 import { CryptoService } from "../crypto/cryptoService";
+import bcrypt from 'bcrypt';
 
 @injectable()
 export class AuthService {
@@ -30,7 +31,9 @@ export class AuthService {
     password: string
   ) {
     const findUser = await this.repository.findUserByEmail(email);
-    let hashpassword = await this.crypto.createHash(password);
+    // let hashpassword = await this.crypto.createHash(password);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     if (findUser) {
       throw new UserAlreadyExists();
     } else {
@@ -38,7 +41,7 @@ export class AuthService {
         name,
         surname,
         email,
-        hashpassword
+        hashedPassword
       );
 
       const code = await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
@@ -48,11 +51,12 @@ export class AuthService {
   }
 
   async loginUser(email: string, password: string) {
-    let hashpassword = await this.crypto.createHash(password);
     let userLogin = await this.repository.findUserByEmail(email);
     const isVerified = await this.repository.isVerified(userLogin.id);
+    
     if (isVerified) {
-      if (userLogin.password === hashpassword) {
+      const match = await bcrypt.compare(password, userLogin.password);
+      if (match) {
         return this.crypto.jwtSign(userLogin.id, userLogin.access_type, config.jwt.token);
       } else {
         throw new WrongCredentials();
@@ -81,10 +85,11 @@ export class AuthService {
     const findUser = await this.repository.findUserByEmail(email);
     if (findUser) {
       const thisCode = await this.notificationservice.getCode(findUser.id, "PASSWORD_RESET");
-      await Promise.all([
-        this.mail.passwordReset(email, thisCode.id),
-        this.notificationservice.addCode(findUser.id, "PASSWORD_RESET"),
-      ]);
+        if(thisCode){
+          await this.notificationservice.deleteCode(thisCode.code);
+        }
+      const newCode = await this.notificationservice.addCode(findUser.id, "PASSWORD_RESET");
+      await this.mail.passwordReset(email, newCode); 
       return findUser;
     } else {
       throw new WrongCredentials();
@@ -93,11 +98,13 @@ export class AuthService {
 
   async changePassword(id: number, code: number, password: string) {
     let checkCode = await this.notificationservice.checkCode(id, code);
-    let hashpassword = await this.crypto.createHash(password);
-    const expires_at = checkCode.created_at + 15 * 60 * 1000;
-    if (checkCode) {
-      if (expires_at < Date.now()) {
-        return this.repository.changePassword(checkCode.user_id, hashpassword);
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const createdAt = new Date(checkCode.rows[0].created_at);
+    const expires_at = createdAt.getTime() + 15 * 60 * 1000;
+    if (checkCode.rows) {
+      if (expires_at > Date.now()) {
+        return this.repository.changePassword(checkCode.rows[0].user_id, hashedPassword);
       } else {
         throw new ExpiredCode();
       }

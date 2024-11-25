@@ -4,12 +4,14 @@ import {
   IItemRepository,
   ItemRepositoryToken,
 } from "./interfaces/IItemRepository";
+import { AWSS3 } from "../utils/uploadS3";
 
 @injectable()
 export class ItemService {
   constructor(
     @inject(ItemRepositoryToken)
-    private readonly repository: IItemRepository
+    private readonly repository: IItemRepository,
+    private readonly s3: AWSS3
   ) {}
 
   async createItem(
@@ -88,4 +90,14 @@ export class ItemService {
     }
   }
 
+    async addPhoto(photo: string, id: number){
+      console.log(id)
+      const photoUrl = await this.s3.uploadS3(photo, 'items', `photos_${id}`);
+      const addedPhoto = await this.repository.addPhoto(photoUrl, id);
+      if(addedPhoto){
+        return photoUrl;
+      } else{
+      throw new NotFound();
+    }
+  }
 }

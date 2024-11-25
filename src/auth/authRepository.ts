@@ -73,11 +73,12 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async changePassword(id: number, password: string) {
+    console.log(id)
     return this.database.query(
       `
       UPDATE users
       SET password = $2
-      WHERE id = $1
+      WHERE id = $1;
       `,
       [id, password]
     );

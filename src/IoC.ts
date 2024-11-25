@@ -25,6 +25,7 @@ import { INotificationRepository, NotificationRepositoryToken } from "./notifica
 import { NotificationRepository } from "./notifications/notificationRepository";
 import { NotificationService } from "./notifications/notificationService";
 import { CryptoService } from "./crypto/cryptoService";
+import { AWSS3 } from "./utils/uploadS3";
 
 const container = new Container();
 
@@ -59,6 +60,8 @@ container
 container.bind(NotificationService).toSelf().inSingletonScope();
 container.bind(RedisConnection).toSelf().inSingletonScope();
 container.bind(CryptoService).toSelf().inSingletonScope();
+container.bind(AWSS3).toSelf().inSingletonScope();
+
 
 
 export { container };
