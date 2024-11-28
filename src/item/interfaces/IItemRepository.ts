@@ -10,8 +10,8 @@ export interface IItemRepository {
     count: number,
     price: number
   ) => Promise<InsertResult>;
-  createCategory: (categoryName: string) => Promise<InsertResult>;
-  deleteItem: (itemId: number) => Promise<DeleteResult>;
+  createCategory: (categoryName: string) => Promise<void>;
+  deleteItem: (itemId: number) => Promise<void>;
   getItemsList: (limit: number, offset: number) => Promise<
     Array<{
       id: number;
@@ -23,8 +23,8 @@ export interface IItemRepository {
       category_name: string;
     }>
   >;
-  changeCount: (count: number, itemId: number) => Promise<UpdateResult>;
-  changePrice: (price: number, itemId: number) => Promise<UpdateResult>;
+  changeCount: (count: number, itemId: number) => Promise<void>;
+  changePrice: (price: number, itemId: number) => Promise<void>;
   findItem: (itemId: number) => Promise<Item | null>;
   priceFilter: (sortBy: "ASC" | "DESC") => Promise< Array<{
     id: number;

@@ -37,11 +37,11 @@ export class AuthRepository implements IAuthRepository {
 
   async changeEmailIsVerified(user_id: number) {
     const repo = this.dataSource.getRepository(User);
-    return repo.update({ id: user_id }, { is_email_verified: true });
+    await repo.update({ id: user_id }, { is_email_verified: true });
   }
 
   async changePassword(id: number, password: string) {
     const repo = this.dataSource.getRepository(User);
-    return repo.update({ id: id }, { password: password });
+    await repo.update({ id: id }, { password: password });
   }
 }

@@ -56,7 +56,7 @@ export class CartRepository implements ICartRepository {
     await repo.update({ id: itemId }, { count: findItem!.count + 1 });
     const repoCart = this.dataSource.getRepository(Cart);
     const findInCart = await repoCart.findOne({where: {user_id: userId, item_id: itemId}})
-    return repoCart.update(
+    await repoCart.update(
       { user_id: userId, item_id: itemId },
       { count: findInCart!.count - 1 }
     );
@@ -64,7 +64,7 @@ export class CartRepository implements ICartRepository {
 
   async deleteItemFromCart(userId: number, itemId: number) {
     const repo = this.dataSource.getRepository(Cart);
-    return repo.delete({ user_id: userId, item_id: itemId });
+    await repo.delete({ user_id: userId, item_id: itemId });
   }
 
   async getCart(userId: number) {

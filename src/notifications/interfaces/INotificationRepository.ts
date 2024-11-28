@@ -6,7 +6,7 @@ export const NotificationRepositoryToken = Symbol(
 
 export interface INotificationRepository {
   getCode: (user_id: number, type_of_notice: string) => Promise<any>;
-  addCode: (code: number, id: number, type: string) => Promise<InsertResult>;
+  addCode: (code: number, id: number, type: string) => Promise<void>;
   checkCode: (id: number, code: number) => Promise<any>;
-  deleteCode: (code: number) => Promise<DeleteResult>;
+  deleteCode: (code: number) => Promise<void>;
 }

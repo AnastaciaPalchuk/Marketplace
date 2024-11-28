@@ -3,7 +3,6 @@ import { CartService } from "./cartService";
 import { NotFound } from "./errors/NotFound";
 import { NotAvailable } from "./errors/NotAvailable";
 import { injectable } from "inversify";
-import { error } from "console";
 
 @injectable()
 export class CartController {

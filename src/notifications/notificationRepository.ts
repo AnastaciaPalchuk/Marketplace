@@ -9,7 +9,7 @@ export class NotificationRepository implements INotificationRepository {
 
   async addCode(code: number, user_id: number, type: string) {
     const repo = this.dataSource.getRepository(Notification);
-    return repo.insert({
+    await repo.insert({
       user_id: user_id,
       code: code,
       type_of_notice: type
@@ -30,6 +30,6 @@ export class NotificationRepository implements INotificationRepository {
 
   async deleteCode(code: number){
     const repo = this.dataSource.getRepository(Notification);
-    return repo.delete({code: code})
+    await repo.delete({code: code})
 }
 }

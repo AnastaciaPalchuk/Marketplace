@@ -20,14 +20,14 @@ export class ItemRepository implements IItemRepository {
 
   async createCategory(categoryName: string) {
     const repo = this.dataSource.getRepository(Category);
-    return repo.insert({
+    await repo.insert({
       name: categoryName
     })
   }
 
   async deleteItem(itemId: number) {
     const repo = this.dataSource.getRepository(Item);
-    return repo.delete({id: itemId})
+    await repo.delete({id: itemId})
   }
 
   async getItemsList(limit: number, offset: number) {
@@ -51,12 +51,12 @@ export class ItemRepository implements IItemRepository {
 
   async changeCount(count: number, itemId: number) {
     const repo = this.dataSource.getRepository(Item);
-    return repo.update({id: itemId}, {count: count})
+    await repo.update({id: itemId}, {count: count})
   }
 
   async changePrice(price: number, itemId: number) {
     const repo = this.dataSource.getRepository(Item);
-    return repo.update({id: itemId}, {price: price})
+    await repo.update({id: itemId}, {price: price})
   }
 
   async findItem(itemId: number) {

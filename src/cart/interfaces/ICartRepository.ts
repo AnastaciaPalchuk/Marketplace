@@ -19,8 +19,8 @@ export interface ICartRepository {
     userId: number,
     itemId: number
   ) => Promise<Cart | null>;
-  deleteFromCart: (userId: number, itemId: number) => Promise<any>;
-  deleteItemFromCart: (userId: number, itemId: number) => Promise<any>;
+  deleteFromCart: (userId: number, itemId: number) => Promise<void>;
+  deleteItemFromCart: (userId: number, itemId: number) => Promise<void>;
   getCart: (
     userId: number
   ) => Promise<

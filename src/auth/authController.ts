@@ -26,7 +26,6 @@ export class AuthController {
         user.email,
         user.password
       );
-      console.log(userInfo)
       ctx.body = {
         user: {
           id: userInfo.generatedMaps[0].id,

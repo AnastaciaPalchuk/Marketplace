@@ -33,7 +33,8 @@ export class CartService {
     const findItem = await this.repository.findItem(userId, itemId);
     console.log(findItem);
     if (findItem!.count > 1) {
-      return this.repository.deleteFromCart(userId, itemId);
+      await this.repository.deleteFromCart(userId, itemId);
+      return;
     } else if (findItem!.count === 1) {
       await this.repository.deleteItemFromCart(userId, itemId);
     } else {

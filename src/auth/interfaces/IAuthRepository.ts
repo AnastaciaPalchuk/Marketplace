@@ -11,7 +11,7 @@ export interface IAuthRepository {
     userEmail: string,
     userPassword: string
   ) => Promise<InsertResult>;
-  changeEmailIsVerified: (user_id: number) => Promise<UpdateResult>;
-  changePassword: (id: number, password: string) => Promise<UpdateResult>;
+  changeEmailIsVerified: (user_id: number) => Promise<void>;
+  changePassword: (id: number, password: string) => Promise<void>;
   findUserById: (id: number) => Promise<User | null>;
 }

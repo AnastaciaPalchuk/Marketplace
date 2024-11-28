@@ -44,7 +44,8 @@ export class ItemService {
   async changeCount(count: number, itemId: number) {
     const findItem = await this.repository.findItem(itemId);
     if (findItem) {
-      return this.repository.changeCount(count, itemId);
+      await this.repository.changeCount(count, itemId);
+      return;
     } else {
       throw new NotFound();
     }
@@ -53,7 +54,8 @@ export class ItemService {
   async changePrice(price: number, itemId: number) {
     const findItem = await this.repository.findItem(itemId);
     if (findItem) {
-      return this.repository.changePrice(price, itemId);
+      await this.repository.changePrice(price, itemId);
+      return;
     } else {
       throw new NotFound();
     }
