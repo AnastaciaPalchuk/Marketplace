@@ -31,7 +31,6 @@ export class AuthService {
     password: string
   ) {
     const findUser = await this.repository.findUserByEmail(email);
-    // let hashpassword = await this.crypto.createHash(password);
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     if (findUser) {
@@ -43,21 +42,20 @@ export class AuthService {
         email,
         hashedPassword
       );
-
-      const code = await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
-      await this.mail.sendMail(user.id, user.email, code);
+      const code = await this.notificationservice.addCode(user.generatedMaps[0].id, "EMAIL_VERIFICATION");
+      await this.mail.sendMail(user.generatedMaps[0].id, email, code);
       return user;
     }
   }
 
   async loginUser(email: string, password: string) {
     let userLogin = await this.repository.findUserByEmail(email);
-    const isVerified = await this.repository.isVerified(userLogin.id);
+    const isVerified = await this.repository.findUserById(userLogin!.id);
     
-    if (isVerified) {
-      const match = await bcrypt.compare(password, userLogin.password);
+    if (isVerified!.is_email_verified) {
+      const match = await bcrypt.compare(password, userLogin!.password);
       if (match) {
-        return this.crypto.jwtSign(userLogin.id, userLogin.access_type, config.jwt.token);
+        return this.crypto.jwtSign(userLogin!.id, userLogin!.access_type, config.jwt.token);
       } else {
         throw new WrongCredentials();
       }
@@ -75,7 +73,7 @@ export class AuthService {
     } else if (expires_at < Date.now()) {
       const user = await this.repository.findUserById(user_id);
       await this.notificationservice.addCode(user_id, "EMAIL_VERIFICATION");
-      await this.mail.sendMail(user_id, user.email, code);
+      await this.mail.sendMail(user_id, user!.email, code);
       throw new ExpiredCode();
     }
     return this.repository.changeEmailIsVerified(user_id);
@@ -100,11 +98,11 @@ export class AuthService {
     let checkCode = await this.notificationservice.checkCode(id, code);
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const createdAt = new Date(checkCode.rows[0].created_at);
+    const createdAt = new Date(checkCode.created_at);
     const expires_at = createdAt.getTime() + 15 * 60 * 1000;
-    if (checkCode.rows) {
+    if (checkCode) {
       if (expires_at > Date.now()) {
-        return this.repository.changePassword(checkCode.rows[0].user_id, hashedPassword);
+        return this.repository.changePassword(checkCode.user_id, hashedPassword);
       } else {
         throw new ExpiredCode();
       }

@@ -19,7 +19,7 @@ export class Mail {
   async sendMail(id: number, userEmail: string, code: number) {
     const verifyLink = `http://localhost:7171/auth/emailVerify?id=${id}&code=${code}`;
 
-    await this.mg.messages.create(config.mailgun.domain as string, {
+    const result = await this.mg.messages.create(config.mailgun.domain as string, {
         from: config.mailgun.sender,
         to: `${userEmail}`,
       subject: "Email verification code",

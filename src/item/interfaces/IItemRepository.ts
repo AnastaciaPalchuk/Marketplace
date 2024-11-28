@@ -1,14 +1,17 @@
+import { DeleteResult, InsertResult, UpdateResult } from "typeorm";
+import { Item } from "../itemEntity";
+
 export const ItemRepositoryToken = Symbol("ItemRepositoryToken");
 
 export interface IItemRepository {
   createItem: (
     itemName: string,
-    categoryId: string,
+    categoryId: number,
     count: number,
     price: number
-  ) => Promise<any>;
-  createCategory: (categoryName: string) => Promise<any>;
-  deleteItem: (itemId: string) => Promise<any>;
+  ) => Promise<InsertResult>;
+  createCategory: (categoryName: string) => Promise<InsertResult>;
+  deleteItem: (itemId: number) => Promise<DeleteResult>;
   getItemsList: (limit: number, offset: number) => Promise<
     Array<{
       id: number;
@@ -20,18 +23,10 @@ export interface IItemRepository {
       category_name: string;
     }>
   >;
-  changeCount: (count: number, itemId: string) => Promise<any>;
-  changePrice: (price: number, itemId: string) => Promise<any>;
-  findItem: (itemId: string) => Promise<{
-    rows: Array<{
-      name: string;
-      id: number;
-      photo: string;
-      count: number;
-      category_id: number;
-    }>;
-  }>;
-  priceFilter: (sortBy: string) => Promise< Array<{
+  changeCount: (count: number, itemId: number) => Promise<UpdateResult>;
+  changePrice: (price: number, itemId: number) => Promise<UpdateResult>;
+  findItem: (itemId: number) => Promise<Item | null>;
+  priceFilter: (sortBy: "ASC" | "DESC") => Promise< Array<{
     id: number;
     name: string;
     photo: string;
@@ -40,7 +35,7 @@ export interface IItemRepository {
     price: number;
     created_at: Date;
   }>>;
-  dateFilter: (sortBy: string) => Promise< Array<{
+  dateFilter: (sortBy: "ASC" | "DESC") => Promise< Array<{
     id: number;
     name: string;
     photo: string;

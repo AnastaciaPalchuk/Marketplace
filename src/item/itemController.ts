@@ -10,7 +10,7 @@ export class ItemController {
   create = async (ctx: Context) => {
     const item = ctx.request.body as {
       itemName: string;
-      categoryId: string;
+      categoryId: number;
       count: number;
       price: number;
     };
@@ -36,7 +36,7 @@ export class ItemController {
   };
 
   delete = async (ctx: Context) => {
-    const item = ctx.request.body as { itemId: string };
+    const item = ctx.request.body as { itemId: number };
     try {
       await this.service.deleteItemFromList(item.itemId);
       ctx.body = { success: true };
@@ -53,13 +53,13 @@ export class ItemController {
   };
 
   changeCount = async (ctx: Context) => {
-    const item = ctx.request.body as { count: number; itemId: string };
+    const item = ctx.request.body as { count: number; itemId: number };
     const changeCount = await this.service.changeCount(item.count, item.itemId);
     ctx.body = { changed: true };
   };
 
   changePrice = async (ctx: Context) => {
-    const item = ctx.request.body as { price: number; itemId: string };
+    const item = ctx.request.body as { price: number; itemId: number };
     const changePrice = await this.service.changePrice(item.price, item.itemId);
     ctx.body = { changed: true };
   };
@@ -76,14 +76,14 @@ export class ItemController {
     try {
       if (queryParams.price) {
         const sortBy = queryParams.price;
-        const result = await this.service.filterByPrice(sortBy as string);
+        const result = await this.service.filterByPrice(sortBy as "ASC" | "DESC");
         result.forEach(item => item.price = +item.price/100);
         ctx.body = result;
         return;
       }
       if (queryParams.createdAt) {
         const sortBy = queryParams.createdAt;
-        const result = await this.service.filterByDate(sortBy as string);
+        const result = await this.service.filterByDate(sortBy as "ASC" | "DESC");
         result.forEach(item => item.price = +item.price/100);
         ctx.body = result;
         return;

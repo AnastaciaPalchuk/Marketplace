@@ -1,139 +1,97 @@
 import { injectable } from "inversify";
-import { Database } from "../infra/database";
+import { Database } from "../infra/dataSource";
 import { IItemRepository } from "./interfaces/IItemRepository";
+import { Item } from "./itemEntity";
+import { Category } from "./categoryEntity";
 
 @injectable()
 export class ItemRepository implements IItemRepository {
-  constructor(private readonly database: Database) {}
+  constructor(private readonly dataSource: Database) {}
 
-  async createItem(itemName: string, categoryId: string, count: number, price: number) {
-    return this.database.query(
-      `
-        insert into items (name, category_id, count, price)
-        VALUES ($1, $2, $3, $4)
-        `,
-      [itemName, categoryId, count, price]
-    );
+  async createItem(itemName: string, categoryId: number, count: number, price: number) {
+    const repo = this.dataSource.getRepository(Item);
+    return repo.insert({
+      name: itemName,
+      category_id: categoryId,
+      count: count,
+      price: price
+    })
   }
 
   async createCategory(categoryName: string) {
-    return this.database.query(
-      `
-        insert into categories (name)
-        VALUES ($1)
-        `,
-      [categoryName]
-    );
+    const repo = this.dataSource.getRepository(Category);
+    return repo.insert({
+      name: categoryName
+    })
   }
 
-  async deleteItem(itemId: string) {
-    return this.database.query(
-      `
-        DELETE 
-        FROM items
-        WHERE id = $1
-        `,
-      [itemId]
-    );
+  async deleteItem(itemId: number) {
+    const repo = this.dataSource.getRepository(Item);
+    return repo.delete({id: itemId})
   }
 
   async getItemsList(limit: number, offset: number) {
-    const list = await this.database.query(
-      `
-        SELECT i.id, i.name, i.count, i.price, i.photo, c.id as category_id, c.name as category_name
-        from items i 
-        inner join categories c on i.category_id = c.id
-        limit  $1
-        offset $2;
-        `,
-      [limit, offset]
-    ) as unknown as { rows: Array<{
-      id: number;
-      name: string;
-      count: number;
-      price: number;
-      photo: string;
-      category_id: number;
-      category_name: string;
-    }> }; 
-    return list.rows
+    const list = await this.dataSource.getRepository(Item)
+    .createQueryBuilder("i")
+    .select([
+      "i.id",
+      "i.name",
+      "i.count",
+      "i.price",
+      "i.photo",
+      "c.id AS category_id",
+      "c.name AS category_name",
+    ])
+    .innerJoin("i.category", "c")
+    .limit(limit)
+    .offset(offset)
+    .getRawMany(); 
+  return list;
   }
 
-  async changeCount(count: number, itemId: string) {
-    return this.database.query(
-      `
-        UPDATE items
-        SET count = $1
-        WHERE id = $2
-        `,
-      [count, itemId]
-    );
+  async changeCount(count: number, itemId: number) {
+    const repo = this.dataSource.getRepository(Item);
+    return repo.update({id: itemId}, {count: count})
   }
 
-  async changePrice(price: number, itemId: string) {
-    return this.database.query(
-      `
-        UPDATE items
-        SET price = $1
-        WHERE id = $2
-        `,
-      [price, itemId]
-    );
+  async changePrice(price: number, itemId: number) {
+    const repo = this.dataSource.getRepository(Item);
+    return repo.update({id: itemId}, {price: price})
   }
 
-  async findItem(itemId: string) {
-    const item = await this.database.query(
-      `
-        SELECT *
-        from items
-        WHERE id = $1
-        `,
-      [itemId]
-    );
-    return item.rows[0];
+  async findItem(itemId: number) {
+    const repo = this.dataSource.getRepository(Item);
+    return repo.findOne({where: {id: itemId}})
   }
 
-  async priceFilter(sortBy: string) {
-    const item = await this.database.query(
-      `
-      SELECT * 
-      FROM items 
-      ORDER BY price ${sortBy};
-      `, []);
-    return item.rows;
+  async priceFilter(sortBy: "ASC" | "DESC") {
+    const repo = this.dataSource.getRepository(Item);
+    const items = await repo
+    .createQueryBuilder("i")
+    .select("*")
+    .orderBy("i.price", sortBy)
+    .getRawMany();
+  return items;
   }
 
-  async dateFilter(sortBy: string) {
-    const item = await this.database.query(
-      `
-      SELECT * 
-      FROM items 
-      ORDER BY created_at $1
-      `, [sortBy]);
-    return item.rows;
+  async dateFilter(sortBy: "ASC" | "DESC") {
+    const repo = this.dataSource.getRepository(Item);
+    const items = await repo
+    .createQueryBuilder("i")
+    .select("*")
+    .orderBy("i.created_at", sortBy)
+    .getRawMany();
+    return items;
   }
 
   async categoryFilter(category_id: number) {
-    const item = await this.database.query(
-      `
-        SELECT *
-        from items
-        WHERE category_id = $1
-        `,
-      [category_id]
-    );
-    return item.rows;
+    const repo = this.dataSource.getRepository(Item);
+    const item = await repo.find({where: {category_id: category_id}})
+    return item;
   }
 
   async addPhoto(url: string, id: number){
-    return this.database.query(
-      `
-      UPDATE items
-        SET photo = $1
-        WHERE id = $2
-
-      `,
-      [url, id]
-    )
+    const repo = this.dataSource.getRepository(Item);
+    return repo.update({id: id}, {photo: url})
   }
 }

@@ -1,50 +1,35 @@
 import { injectable } from "inversify";
-import { Database } from "../infra/database";
+import { Database } from "../infra/dataSource";
 import { INotificationRepository } from "./interfaces/INotificationRepository";
+import { Notification } from "./notificationsEntity";
 
 @injectable()
 export class NotificationRepository implements INotificationRepository {
-  constructor(private readonly database: Database) {}
+  constructor(private readonly dataSource: Database) {}
 
   async addCode(code: number, user_id: number, type: string) {
-    return this.database.query(
-      `
-                  insert into notifications (user_id, code, type_of_notice)
-                  VALUES ($1, $2, $3);
-                  `,
-      [user_id, code, type]
-    );
+    const repo = this.dataSource.getRepository(Notification);
+    return repo.insert({
+      user_id: user_id,
+      code: code,
+      type_of_notice: type
+    })
   }
 
   async getCode(user_id: number, type_of_notice: string) {
-    const getCode = await this.database.query(
-      `
-     SELECT code
-      from notifications
-      where user_id = $1 and type_of_notice = $2;
-      `,
-      [user_id, type_of_notice]
-    );
-    return getCode.rows[0];
+    const repo = this.dataSource.getRepository(Notification);
+    const getCode = await repo.findOne({where: {user_id: user_id, type_of_notice: type_of_notice}})
+    return getCode;
   }
 
   async checkCode(id: number, code: number) {
-    const user = await this.database.query(
-      `
-      SELECT *
-      from notifications
-      WHERE user_id = $1 and code = $2
-      `,
-      [id, code]
-    );
+    const repo = this.dataSource.getRepository(Notification);
+    const user = await repo.findOne({where: {user_id: id, code: code}})
     return user;
   }
 
   async deleteCode(code: number){
-    return this.database.query(`
-      DELETE
-      from notifications
-      WHERE code = $1;
-      `, [code])
-  }
+    const repo = this.dataSource.getRepository(Notification);
+    return repo.delete({code: code})
+}
 }

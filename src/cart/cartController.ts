@@ -3,6 +3,7 @@ import { CartService } from "./cartService";
 import { NotFound } from "./errors/NotFound";
 import { NotAvailable } from "./errors/NotAvailable";
 import { injectable } from "inversify";
+import { error } from "console";
 
 @injectable()
 export class CartController {
@@ -19,6 +20,7 @@ export class CartController {
         ctx.body = err.message;
         return;
       }
+      throw err;
     }
   };
 

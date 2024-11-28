@@ -17,11 +17,10 @@ export class CartService {
 
   async addItem(userId: number, itemId: number) {
     const itemCount = await this.repository.checkAvailability(itemId);
-    if (itemCount > 0) {
+    if (itemCount! > 0) {
       const itemInCart = await this.repository.checkItemInCart(userId, itemId);
-      if (itemInCart.length) {
-        const cartCount = itemInCart[0].count;
-        return this.repository.changeCartCount(cartCount, userId, itemId);
+      if (itemInCart) {
+        return this.repository.changeCartCount(itemInCart.count, userId, itemId);
       } else {
         return this.repository.addItemToCart(userId, itemId);
       }
@@ -33,9 +32,9 @@ export class CartService {
   async deleteFromCart(userId: number, itemId: number) {
     const findItem = await this.repository.findItem(userId, itemId);
     console.log(findItem);
-    if (findItem.rows[0].count > 1) {
+    if (findItem!.count > 1) {
       return this.repository.deleteFromCart(userId, itemId);
-    } else if (findItem.rows[0].count === 1) {
+    } else if (findItem!.count === 1) {
       await this.repository.deleteItemFromCart(userId, itemId);
     } else {
       throw new NotFound();

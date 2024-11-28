@@ -1,21 +1,24 @@
+import { InsertResult } from "typeorm";
+import { Cart } from "../cartEntity";
+
 export const CartRepositoryToken = Symbol("CartRepositoryToken");
 
 export interface ICartRepository {
-  checkAvailability: (itemId: number) => Promise<number>;
+  checkAvailability: (itemId: number) => Promise<number | undefined>;
   checkItemInCart: (
     userId: number,
     itemId: number
-  ) => Promise<Array<{ count: number }>>;
+  ) => Promise<Cart | null>;
   changeCartCount: (
     count: number,
     userId: number,
     itemId: number
   ) => Promise<any>;
-  addItemToCart: (userId: number, itemId: number) => Promise<any>;
+  addItemToCart: (userId: number, itemId: number) => Promise<InsertResult>;
   findItem: (
     userId: number,
     itemId: number
-  ) => Promise<{ rows: Array<{ count: number }> }>;
+  ) => Promise<Cart | null>;
   deleteFromCart: (userId: number, itemId: number) => Promise<any>;
   deleteItemFromCart: (userId: number, itemId: number) => Promise<any>;
   getCart: (

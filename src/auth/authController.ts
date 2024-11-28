@@ -26,12 +26,13 @@ export class AuthController {
         user.email,
         user.password
       );
+      console.log(userInfo)
       ctx.body = {
         user: {
-          id: userInfo.id,
-          name: userInfo.name,
-          surname: userInfo.surname,
-          email: userInfo.email,
+          id: userInfo.generatedMaps[0].id,
+          name: user.name,
+          surname: user.surname,
+          email: user.email,
         },
       };
     } catch (err: any) {
@@ -75,11 +76,7 @@ export class AuthController {
   verifyEmail = async (ctx: Context) => {
     const params = ctx.query as {code: string, id: string};
     try{
-      const verifier = await this.service.verifyEmail(+params.code, +params.id);
-      if(verifier === "expired"){
-        ctx.body = { response: "code expired, new one sent to your email"}
-        return;
-      }
+      await this.service.verifyEmail(+params.code, +params.id);
       ctx.body = { success: true};
     }catch(err: any){
       if (err instanceof WrongCode || err instanceof ExpiredCode){

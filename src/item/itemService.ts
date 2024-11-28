@@ -16,13 +16,13 @@ export class ItemService {
 
   async createItem(
     itemName: string,
-    categoryId: string,
+    categoryId: number,
     count: number,
     price: number
   ) {
     const newItemAdded = await this.repository.createItem(
       itemName,
-      categoryId,
+      +categoryId,
       count,
       price
     );
@@ -32,7 +32,7 @@ export class ItemService {
     const categoryCreated = await this.repository.createCategory(categoryName);
   }
 
-  async deleteItemFromList(itemId: string) {
+  async deleteItemFromList(itemId: number) {
     const findItem = await this.repository.findItem(itemId);
     if (findItem) {
       return this.repository.deleteItem(itemId);
@@ -41,7 +41,7 @@ export class ItemService {
     }
   }
 
-  async changeCount(count: number, itemId: string) {
+  async changeCount(count: number, itemId: number) {
     const findItem = await this.repository.findItem(itemId);
     if (findItem) {
       return this.repository.changeCount(count, itemId);
@@ -50,7 +50,7 @@ export class ItemService {
     }
   }
 
-  async changePrice(price: number, itemId: string) {
+  async changePrice(price: number, itemId: number) {
     const findItem = await this.repository.findItem(itemId);
     if (findItem) {
       return this.repository.changePrice(price, itemId);
@@ -63,7 +63,7 @@ export class ItemService {
     return this.repository.getItemsList(limit, page*limit);
   }
 
-  async filterByPrice(sortBy: string) {
+  async filterByPrice(sortBy: "ASC" | "DESC") {
     const priceFilter = await this.repository.priceFilter(sortBy);
     if (priceFilter) {
       return priceFilter;
@@ -72,7 +72,7 @@ export class ItemService {
     }
   }
 
-  async filterByDate(sortBy: string){
+  async filterByDate(sortBy: "ASC" | "DESC"){
     const priceFilter = await this.repository.priceFilter(sortBy);
     if (priceFilter) {
       return priceFilter;

@@ -1,143 +1,95 @@
 import { injectable } from "inversify";
-import { Database } from "../infra/database";
+import { Database } from "../infra/dataSource";
 import { ICartRepository } from "./interfaces/ICartRepository";
+import { Cart } from "./cartEntity";
+import { count } from "console";
+import { Item } from "../item/itemEntity";
 
 @injectable()
 export class CartRepository implements ICartRepository {
-  constructor(private readonly database: Database) {}
+  constructor(private readonly dataSource: Database) {}
 
   async checkAvailability(itemId: number) {
-    const result = await this.database.query(
-      `
-       SELECT items.count
-        from items
-        where id = $1;
-        `,
-      [itemId]
-    );
-    return result.rows[0].count;
+    const repo = this.dataSource.getRepository(Item);
+    const item = await repo.findOne({ where: { id: itemId } });
+    return item!.count;
   }
 
   async checkItemInCart(userId: number, itemId: number) {
-    const check = await this.database.query(
-      `
-        SELECT cart.count
-        from cart
-        where user_id = $1 and item_id = $2;
-        `,
-      [userId, itemId]
-    );
-    return check.rows;
+    const repo = this.dataSource.getRepository(Cart);
+    const check = await repo.findOne({where: {user_id: userId, item_id: itemId },
+    });
+    return check;
   }
 
   async changeCartCount(count: number, userId: number, itemId: number) {
-    await this.database.query(
-      `
-        UPDATE items
-        SET count = count -1
-        WHERE id = $1
-        `,
-      [itemId]
-    );
-
-    return this.database.query(
-      `
-        UPDATE cart
-        SET count = $1 + 1
-        WHERE user_id = $2 and item_id = $3;
-        `,
-      [count, userId, itemId]
+    const repo = this.dataSource.getRepository(Cart);
+    const repoItem = this.dataSource.getRepository(Item);
+    await repoItem.update({ id: itemId }, { count: count - 1 });
+    return repo.update(
+      { user_id: userId, item_id: itemId },
+      { count: count + 1 }
     );
   }
 
   async addItemToCart(userId: number, itemId: number) {
-    await this.database.query(
-      `
-        UPDATE items
-        SET count = count -1
-        WHERE id = $1
-        `,
-      [itemId]
-    );
-
-      const findItem = await this.database.query(`
-        SELECT price
-        from items
-        where id = $1`, [itemId])
-
-    const addItem = await this.database.query(
-      `
-          insert into cart (user_id, item_id, count, price) 
-          VALUES ($1, $2, 1, $3);
-          `,
-      [userId, itemId, findItem.rows[0].price ]
-    );
+    const repo = this.dataSource.getRepository(Cart);
+    const repoItem = this.dataSource.getRepository(Item);
+    const findItem = await repoItem.findOne({ where: { id: itemId } });
+    const upd = await repoItem.update({ id: itemId }, { count: findItem!.count - 1 });
+    const addItem = await repo.insert({
+      user_id: userId,
+      item_id: itemId,
+      count: 1,
+      price: findItem!.price,
+    });
     return addItem;
   }
   async findItem(userId: number, itemId: number) {
-    return this.database.query(
-      `
-        SELECT *
-        from cart
-        where user_id = $1 and item_id = $2;
-        `,
-      [userId, itemId]
-    );
+    const repo = this.dataSource.getRepository(Cart);
+    return repo.findOne({ where: { user_id: userId, item_id: itemId } });
   }
 
   async deleteFromCart(userId: number, itemId: number) {
-    this.database.query(
-      `
-        UPDATE items
-        SET count = count + 1
-        WHERE id = $1;
-          `,
-      [itemId]
-    );
-
-    return this.database.query(
-      `
-        UPDATE cart
-        SET count = count - 1
-        WHERE user_id = $1 and item_id = $2;
-          `,
-      [userId, itemId]
+    const repo = this.dataSource.getRepository(Item);
+    const findItem = await repo.findOne({ where: { id: itemId } });
+    await repo.update({ id: itemId }, { count: findItem!.count + 1 });
+    const repoCart = this.dataSource.getRepository(Cart);
+    const findInCart = await repoCart.findOne({where: {user_id: userId, item_id: itemId}})
+    return repoCart.update(
+      { user_id: userId, item_id: itemId },
+      { count: findInCart!.count - 1 }
     );
   }
 
   async deleteItemFromCart(userId: number, itemId: number) {
-    return this.database.query(
-      `
-        DELETE
-        FROM cart
-        WHERE user_id = $1 and item_id = $2
-        `,
-      [userId, itemId]
-    );
+    const repo = this.dataSource.getRepository(Cart);
+    return repo.delete({ user_id: userId, item_id: itemId });
   }
 
   async getCart(userId: number) {
-    const prices = await this.database.query(`
-      SELECT price, count, item_id
-      from cart
-      where user_id = $1;
-      `, [userId])
-
-      const totalAmount = prices.rows.reduce((sum, current) => sum + current.price * current.count, 0);
-
-    const getAllItems = await this.database.query(
-      `
-       SELECT c.id, c.count, i.id as item_id, i.name as item_name, ct.name as category_name, u.name as user_name
-          from cart c
-          inner join items i on c.item_id = i.id
-          inner join categories ct on ct.id = i.category_id
-          inner join users u on  c.user_id = u.id
-          where user_id = $1;
-          `,
-      [userId]
+    const repo = this.dataSource.getRepository(Cart);
+    const prices = await repo.find({ where: { user_id: userId } });
+    const totalAmount = prices.reduce(
+      (sum, current) => sum + current.price * current.count,
+      0
     );
+    const getAllItems = await repo
+      .createQueryBuilder("c")
+      .select([
+        "c.id AS cart_id",
+        "c.count AS count",
+        "i.id AS item_id",
+        "i.name AS item_name",
+        "ct.name AS category_name",
+        "u.name AS user_name",
+      ])
+      .innerJoin("c.item", "i")
+      .innerJoin("i.category", "ct")
+      .innerJoin("c.user", "u")
+      .where("c.user_id = :userId", { userId })
+      .getRawMany();
 
-    return { Cart: getAllItems.rows, Total: totalAmount/100};
+    return { Cart: getAllItems, Total: totalAmount / 100 };
   }
-
 }
