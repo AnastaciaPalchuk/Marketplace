@@ -1,17 +1,16 @@
-import { InsertResult, UpdateResult } from "typeorm";
-import { User } from "../userEntity";
+import { UserModel } from "../UserModel";
 
 export const AuthRepositoryToken = Symbol("AuthRepositoryToken");
 
 export interface IAuthRepository {
-  findUserByEmail: (userEmail: string) => Promise<User | null>;
+  findUserByEmail: (userEmail: string) => Promise<UserModel | null>;
   createNewUser: (
     userName: string,
     userSurname: string,
     userEmail: string,
     userPassword: string
-  ) => Promise<InsertResult>;
+  ) => Promise<UserModel>;
   changeEmailIsVerified: (user_id: number) => Promise<void>;
   changePassword: (id: number, password: string) => Promise<void>;
-  findUserById: (id: number) => Promise<User | null>;
+  findUserById: (id: number) => Promise<UserModel | null>;
 }

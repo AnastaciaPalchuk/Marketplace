@@ -42,8 +42,8 @@ export class AuthService {
         email,
         hashedPassword
       );
-      const code = await this.notificationservice.addCode(user.generatedMaps[0].id, "EMAIL_VERIFICATION");
-      await this.mail.sendMail(user.generatedMaps[0].id, email, code);
+      const code = await this.notificationservice.addCode(user.id, "EMAIL_VERIFICATION");
+      await this.mail.sendMail(user.id, email, code);
       return user;
     }
   }
@@ -51,9 +51,9 @@ export class AuthService {
   async loginUser(email: string, password: string) {
     let userLogin = await this.repository.findUserByEmail(email);
     const isVerified = await this.repository.findUserById(userLogin!.id);
-    
     if (isVerified!.is_email_verified) {
       const match = await bcrypt.compare(password, userLogin!.password);
+      console.log(match)
       if (match) {
         return this.crypto.jwtSign(userLogin!.id, userLogin!.access_type, config.jwt.token);
       } else {
@@ -83,8 +83,8 @@ export class AuthService {
     const findUser = await this.repository.findUserByEmail(email);
     if (findUser) {
       const thisCode = await this.notificationservice.getCode(findUser.id, "PASSWORD_RESET");
-        if(thisCode){
-          await this.notificationservice.deleteCode(thisCode.code);
+      if(thisCode){
+          await this.notificationservice.deleteCode(thisCode.dataValues.code);
         }
       const newCode = await this.notificationservice.addCode(findUser.id, "PASSWORD_RESET");
       await this.mail.passwordReset(email, newCode); 

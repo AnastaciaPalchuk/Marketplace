@@ -1,21 +1,19 @@
 import { injectable } from "inversify";
-import { User } from "./userEntity";
+import { UserModel } from "./UserModel";
 import { IAuthRepository } from "./interfaces/IAuthRepository";
-import { Database } from "../infra/dataSource";
+import { Database } from "../infra/database";
 
 @injectable()
 export class AuthRepository implements IAuthRepository {
   constructor(private readonly dataSource: Database) {}
 
   async findUserByEmail(userEmail: string) {
-    const repo = this.dataSource.getRepository(User);
-    const user = await repo.findOne({ where: { email: userEmail } });
+    const user = await UserModel.findOne({ where: { email: userEmail } });
     return user;
   }
   async findUserById(id: number) {
-    const repo = this.dataSource.getRepository(User);
-    const user = await repo.findOne({ where: { id: id } });
-    return user;
+    const user = await UserModel.findOne({ where: { id: id } });
+    return user!.dataValues;
   }
 
   async createNewUser(
@@ -24,8 +22,7 @@ export class AuthRepository implements IAuthRepository {
     userEmail: string,
     userPassword: string
   ) {
-    const repo = this.dataSource.getRepository(User);
-    const user = await repo.insert({
+    const user = await UserModel.create({
       name: userName,
       surname: userSurname,
       email: userEmail,
@@ -36,12 +33,10 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async changeEmailIsVerified(user_id: number) {
-    const repo = this.dataSource.getRepository(User);
-    await repo.update({ id: user_id }, { is_email_verified: true });
+    await UserModel.update({is_email_verified: true }, { where: { id: user_id }});
   }
 
   async changePassword(id: number, password: string) {
-    const repo = this.dataSource.getRepository(User);
-    await repo.update({ id: id }, { password: password });
+    await UserModel.update({password: password }, { where: { id: id }});
   }
 }

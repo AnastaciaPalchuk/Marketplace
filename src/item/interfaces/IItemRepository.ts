@@ -1,5 +1,4 @@
-import { DeleteResult, InsertResult, UpdateResult } from "typeorm";
-import { Item } from "../itemEntity";
+import { ItemModel } from "../ItemModel";
 
 export const ItemRepositoryToken = Symbol("ItemRepositoryToken");
 
@@ -9,23 +8,15 @@ export interface IItemRepository {
     categoryId: number,
     count: number,
     price: number
-  ) => Promise<InsertResult>;
+  ) => Promise<ItemModel>;
   createCategory: (categoryName: string) => Promise<void>;
   deleteItem: (itemId: number) => Promise<void>;
   getItemsList: (limit: number, offset: number) => Promise<
-    Array<{
-      id: number;
-      name: string;
-      count: number;
-      price: number;
-      photo: string;
-      category_id: number;
-      category_name: string;
-    }>
+    Array<ItemModel>
   >;
   changeCount: (count: number, itemId: number) => Promise<void>;
   changePrice: (price: number, itemId: number) => Promise<void>;
-  findItem: (itemId: number) => Promise<Item | null>;
+  findItem: (itemId: number) => Promise<ItemModel | null>;
   priceFilter: (sortBy: "ASC" | "DESC") => Promise< Array<{
     id: number;
     name: string;

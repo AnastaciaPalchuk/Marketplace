@@ -8,7 +8,7 @@ import AuthRouter from "./auth/authRouter";
 import CartRouter from "./cart/cartRouter";
 import ItemRouter from "./item/itemRouter";
 import { container } from "./IoC";
-import { Database } from "./infra/dataSource";
+import { Database } from "./infra/database";
 import { RedisConnection } from "./infra/redis";
 
 async function main() {

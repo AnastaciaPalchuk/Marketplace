@@ -1,97 +1,100 @@
 import { injectable } from "inversify";
-import { Database } from "../infra/dataSource";
+import { Database } from "../infra/database";
 import { IItemRepository } from "./interfaces/IItemRepository";
-import { Item } from "./itemEntity";
-import { Category } from "./categoryEntity";
+import { ItemModel } from "./ItemModel";
+import { CategoryModel } from "./CategoryModel";
+import { Sequelize } from "sequelize-typescript";
 
 @injectable()
 export class ItemRepository implements IItemRepository {
   constructor(private readonly dataSource: Database) {}
 
-  async createItem(itemName: string, categoryId: number, count: number, price: number) {
-    const repo = this.dataSource.getRepository(Item);
-    return repo.insert({
+  async createItem(
+    itemName: string,
+    categoryId: number,
+    count: number,
+    price: number
+  ) {
+    return ItemModel.create({
       name: itemName,
       category_id: categoryId,
       count: count,
-      price: price
-    })
+      price: price,
+    });
   }
 
   async createCategory(categoryName: string) {
-    const repo = this.dataSource.getRepository(Category);
-    await repo.insert({
-      name: categoryName
-    })
+    await CategoryModel.create({
+      name: categoryName,
+    });
   }
 
   async deleteItem(itemId: number) {
-    const repo = this.dataSource.getRepository(Item);
-    await repo.delete({id: itemId})
+    await ItemModel.destroy({ where: { id: itemId } });
   }
 
   async getItemsList(limit: number, offset: number) {
-    const list = await this.dataSource.getRepository(Item)
-    .createQueryBuilder("i")
-    .select([
-      "i.id",
-      "i.name",
-      "i.count",
-      "i.price",
-      "i.photo",
-      "c.id AS category_id",
-      "c.name AS category_name",
-    ])
-    .innerJoin("i.category", "c")
-    .limit(limit)
-    .offset(offset)
-    .getRawMany(); 
-  return list;
+    const list = await ItemModel.findAll({
+      attributes: [
+        "id",
+        "name",
+        "count",
+        "price",
+        "photo",
+        "category_id",
+       "category_name",
+      ],
+      include: [
+        {
+          model: CategoryModel,
+          as: "category",
+          attributes: [],
+        },
+      ],
+      limit,
+      offset,
+      raw: true,
+    });
+
+    return list;
   }
 
   async changeCount(count: number, itemId: number) {
-    const repo = this.dataSource.getRepository(Item);
-    await repo.update({id: itemId}, {count: count})
+    await ItemModel.update({ count: count }, { where: { id: itemId } });
   }
 
   async changePrice(price: number, itemId: number) {
-    const repo = this.dataSource.getRepository(Item);
-    await repo.update({id: itemId}, {price: price})
+    await ItemModel.update({ price: price }, { where: { id: itemId } });
   }
 
   async findItem(itemId: number) {
-    const repo = this.dataSource.getRepository(Item);
-    return repo.findOne({where: {id: itemId}})
+    return ItemModel.findOne({ where: { id: itemId } });
   }
 
   async priceFilter(sortBy: "ASC" | "DESC") {
-    const repo = this.dataSource.getRepository(Item);
-    const items = await repo
-    .createQueryBuilder("i")
-    .select("*")
-    .orderBy("i.price", sortBy)
-    .getRawMany();
-  return items;
+    const items = await ItemModel.findAll({
+      order: [["price", sortBy]],
+      raw: true,
+    });
+    return items;
   }
 
   async dateFilter(sortBy: "ASC" | "DESC") {
-    const repo = this.dataSource.getRepository(Item);
-    const items = await repo
-    .createQueryBuilder("i")
-    .select("*")
-    .orderBy("i.created_at", sortBy)
-    .getRawMany();
+    const items = await ItemModel.findAll({
+      order: [["created_at", sortBy]],
+      raw: true,
+    });
     return items;
   }
 
   async categoryFilter(category_id: number) {
-    const repo = this.dataSource.getRepository(Item);
-    const item = await repo.find({where: {category_id: category_id}})
+    const item = await ItemModel.findAll({
+      where: { category_id: category_id },
+    });
     return item;
   }
 
-  async addPhoto(url: string, id: number){
-    const repo = this.dataSource.getRepository(Item);
-    return repo.update({id: id}, {photo: url})
+  async addPhoto(url: string, id: number) {
+    return ItemModel.update({ photo: url }, { where: { id: id } });
   }
 }
