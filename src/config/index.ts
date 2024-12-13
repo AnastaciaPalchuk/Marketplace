@@ -6,13 +6,6 @@ export = {
   server: {
     port: env.WEB_PORT,
   },
-  database: {
-    username: env.DATABASE_USERNAME,
-    password: env.DATABASE_PASSWORD,
-    database_name: env.DATABASE,
-    host: env.HOST,
-    database_port: Number(env.DATABASE_PORT),
-  },
   redis: {
     port: Number(env.REDIS_PORT),
     host: env.REDIS_HOST
@@ -31,5 +24,4 @@ export = {
     bucketName: env.BUCKET_NAME,
     photoFolder: env.USER_PHOTO_FOLDER,
   }
-
 };

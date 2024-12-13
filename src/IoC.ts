@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import { AuthController } from "./auth/authController";
 import { AuthRepository } from "./auth/authRepository";
 import { AuthService } from "./auth/authService";
-import { Database } from "./infra/dataSource";
+import { Database } from "./infra/database";
 import { RedisConnection } from "./infra/redis";
 
 import {

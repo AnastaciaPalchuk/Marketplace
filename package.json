@@ -5,7 +5,10 @@
   "scripts": {
     "tsc": "tsc",
     "start": "node ./dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migrate:up": "./node_modules/.bin/sequelize-cli db:migrate",
+    "create_migration": "./node_modules/.bin/sequelize-cli migration:create --name test"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +17,6 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
-    "@types/node": "^22.7.5",
     "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
@@ -29,7 +31,9 @@
     "pg": "^8.13.0",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.20",
+    "sequelize": "^6.37.5",
+    "sequelize-cli": "^6.6.2",
+    "sequelize-typescript": "^2.1.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -39,7 +43,10 @@
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.4",
     "@types/koa-bodyparser": "^4.3.12",
+    "@types/node": "^22.10.1",
     "@types/pg": "^8.11.10",
+    "@types/validator": "^13.12.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   }
 }

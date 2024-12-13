@@ -28,7 +28,7 @@ export class AuthController {
       );
       ctx.body = {
         user: {
-          id: userInfo.generatedMaps[0].id,
+          id: userInfo.id,
           name: user.name,
           surname: user.surname,
           email: user.email,
@@ -40,6 +40,7 @@ export class AuthController {
         ctx.body = err.message;
         return;
       }
+      console.log(err)
       ctx.status = 500;
       ctx.body = err.message;
       return;
