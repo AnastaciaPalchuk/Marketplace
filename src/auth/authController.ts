@@ -40,7 +40,6 @@ export class AuthController {
         ctx.body = err.message;
         return;
       }
-      console.log(err)
       ctx.status = 500;
       ctx.body = err.message;
       return;

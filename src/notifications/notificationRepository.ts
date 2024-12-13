@@ -22,7 +22,7 @@ export class NotificationRepository implements INotificationRepository {
 
   async checkCode(id: number, code: number) {
     const user = await NotificationModel.findOne({where: {user_id: id, code: code}})
-    return user!.dataValues;
+    return user!.toJSON;
   }
 
   async deleteCode(code: number){

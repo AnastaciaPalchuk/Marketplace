@@ -67,29 +67,29 @@ export class CartRepository implements ICartRepository {
     );
     const getAllItems = await CartModel.findAll({
       attributes: [
-        ["id", "cart_id"],
-        ["count", "count"]
+        "id", "cart_id",
+        "count", "count"
       ],
       include: [
         {
           model: ItemModel,
           as: "item",
           attributes: [
-            ["id", "item_id"],
-            ["name", "item_name"],
+            "id", "item_id",
+            "name", "item_name",
           ],
           include: [
             {
               model: CategoryModel,
               as: "category",
-              attributes: [["name", "category_name"]],
+              attributes: ["name", "category_name"],
             },
           ],
         },
         {
           model: UserModel,
           as: "user",
-          attributes: [["name", "user_name"]],
+          attributes: ["name", "user_name"],
         },
       ],
       where: {
